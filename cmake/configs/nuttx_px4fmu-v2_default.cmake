@@ -44,7 +44,7 @@ set(config_module_list
 	drivers/oreoled
 	drivers/gimbal
 	drivers/pwm_input
-	drivers/camera_trigger
+	#drivers/camera_trigger
 	drivers/bst
 
 	#
@@ -93,6 +93,7 @@ set(config_module_list
 	modules/mc_att_control
 	modules/mc_pos_control
 	modules/vtol_att_control
+    modules/dbx_control
 
 	#
 	# Logging
@@ -138,7 +139,7 @@ set(config_module_list
 	#
 	# Rover apps
 	#
-	examples/rover_steering_control
+	#examples/rover_steering_control
 
 	#
 	# Demo apps
