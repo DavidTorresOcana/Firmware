@@ -258,7 +258,7 @@ int simulink_main(int argc, char *argv[])
         dbx_control_U.q1 = attitude.q[1];
         dbx_control_U.q2 = attitude.q[2];
         dbx_control_U.q3 = attitude.q[3];
-        dbx_control_U.baro_alt = sensors.baro_alt_meter;
+        dbx_control_U.baro_alt = sensors.baro_alt_meter[0]; // There are up to 3 baros, Use the one you need
         dbx_control_U.gps_sat = gps.satellites_used;
         dbx_control_U.gps_lat = 0.0000001*(double)gps.lat;
         dbx_control_U.gps_lon = 0.0000001*(double)gps.lon;
@@ -280,7 +280,7 @@ int simulink_main(int argc, char *argv[])
         dbx_control_U.gps_pdop = gps.eph; // pdop or hdop
         dbx_control_U.gps_vdop = gps.epv; // vdop
         dbx_control_U.bat_volts = bat_status.voltage_filtered_v; // Batery volts
-        dbx_control_U.pitot_diff_pre = sensors.differential_pressure_filtered_pa; // Pitot presion dinamica
+        dbx_control_U.pitot_diff_pre = sensors.differential_pressure_filtered_pa[0]; // Pitot presion dinamica
         dbx_control_U.TAS_mps = airspeed.true_airspeed_m_s; // TAS estimada
 
         if (i < 10) { // 10Hz loop
@@ -407,24 +407,24 @@ int simulink_main(int argc, char *argv[])
               (double)dbx_control_Y.debug6,
               (double)dbx_control_Y.debug7,
               (double)dbx_control_Y.debug8); */
-
+          
           // Sensors debuging and testing
           printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t\n",
-               (double)(dbx_control_U.runtime/1000000),
-               (double)local_pos.x,
-               (double)local_pos.y,
-               (double)local_pos.z,
-               (double)gps.epv,
-               (double)local_pos.vx,
-               (double)local_pos.vy,
-               (double)local_pos.vz,
-               (double)airspeed.true_airspeed_m_s,
-               (double)sensors.baro_alt_meter,
-               (double)sensors.accelerometer_m_s2[2],
-               (double)sensors.gyro_rad_s[0],
-               (double)bat_status.voltage_filtered_v,
-               (double)attitude.pitch,
-				(double)attitude.yaw);
+                  (double)(dbx_control_U.runtime/1000000),
+                  (double)local_pos.x,
+                  (double)local_pos.y,
+                  (double)local_pos.z,
+                  (double)gps.epv,
+                  (double)local_pos.vx,
+                  (double)local_pos.vy,
+                  (double)local_pos.vz,
+                  (double)airspeed.true_airspeed_m_s,
+                  (double)sensors.baro_alt_meter[0], // TO BE verified: Is it correct altitude?
+                  (double)sensors.accelerometer_m_s2[2],
+                  (double)sensors.gyro_rad_s[0],
+                  (double)bat_status.voltage_filtered_v,
+                  (double)attitude.pitch,
+                  (double)attitude.yaw);
           i = 1;
         }
         // output pwm signals

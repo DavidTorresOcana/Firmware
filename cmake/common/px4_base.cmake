@@ -489,17 +489,17 @@ function(px4_add_common_flags)
 
 	set(warnings
 		-Wall
-		-Werror
+		##-Werror
 		-Wno-sign-compare
 		-Wextra
 		#-Wshadow # very verbose due to eigen
-		-Wfloat-equal
+		##-Wfloat-equal
 		-Wpointer-arith
 		-Wmissing-declarations
 		-Wno-unused-parameter
 		-Werror=format-security
 		-Werror=array-bounds
-		-Wfatal-errors
+		##-Wfatal-errors
 		-Werror=unused-variable
 		-Werror=reorder
 		-Werror=uninitialized
@@ -530,7 +530,7 @@ function(px4_add_common_flags)
 			-Wformat=1
 			#-Wlogical-op # very verbose due to eigen
 			-Wdouble-promotion
-			-Werror=double-promotion
+			##-Werror=double-promotion
 		)
 	endif()
 

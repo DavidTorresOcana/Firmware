@@ -5,6 +5,7 @@ px4_add_module(
 	STACK 1200
 	COMPILE_FLAGS
 		-Os
+        
 	SRCS
 		dbx_control_wrapper.c
 	DEPENDS
