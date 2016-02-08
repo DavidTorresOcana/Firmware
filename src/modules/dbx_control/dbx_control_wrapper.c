@@ -236,7 +236,12 @@ int simulink_main(int argc, char *argv[])
         orb_copy(ORB_ID(battery_status), bat_status_sub, &bat_status);
         orb_copy(ORB_ID(airspeed), airspeed_sub, &airspeed);
 		orb_copy(ORB_ID(vehicle_local_position), local_pos_sub, &local_pos);
-
+        // Filtering noise in PWM Radio inputs
+        for(int q=0;q<=7;q++) {
+            if(pwm_inputs.values[q]<(double) 1000.0){ pwm_inputs.values[q]= (double) 1000.0;}
+            if(pwm_inputs.values[q]>(double) 2000.0){ pwm_inputs.values[q]= (double) 2000.0;}
+        }
+        // Decalre Simulink inputs
         dbx_control_U.runtime = hrt_absolute_time();
         dbx_control_U.mag_x = sensors.magnetometer_ga[0];
         dbx_control_U.mag_y = sensors.magnetometer_ga[1];
