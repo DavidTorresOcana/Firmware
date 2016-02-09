@@ -23,7 +23,6 @@
 
 #include <uORB/topics/vehicle_local_position.h>
 
-
 #include <drivers/drv_led.h>
 #include <drivers/drv_rgbled.h>
 #include <drivers/drv_pwm_output.h>
@@ -237,7 +236,12 @@ int simulink_main(int argc, char *argv[])
         orb_copy(ORB_ID(battery_status), bat_status_sub, &bat_status);
         orb_copy(ORB_ID(airspeed), airspeed_sub, &airspeed);
 		orb_copy(ORB_ID(vehicle_local_position), local_pos_sub, &local_pos);
-
+        // Filtering noise in PWM Radio inputs
+        for(int q=0;q<=7;q++) {
+            if(pwm_inputs.values[q]<(double) 1000.0){ pwm_inputs.values[q]= (double) 1000.0;}
+            if(pwm_inputs.values[q]>(double) 2000.0){ pwm_inputs.values[q]= (double) 2000.0;}
+        }
+        // Decalre Simulink inputs
         dbx_control_U.runtime = hrt_absolute_time();
         dbx_control_U.mag_x = sensors.magnetometer_ga[0];
         dbx_control_U.mag_y = sensors.magnetometer_ga[1];
@@ -407,24 +411,34 @@ int simulink_main(int argc, char *argv[])
               (double)dbx_control_Y.debug6,
               (double)dbx_control_Y.debug7,
               (double)dbx_control_Y.debug8); */
-          
-          // Sensors debuging and testing
-          printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t\n",
-                  (double)(dbx_control_U.runtime/1000000),
-                  (double)local_pos.x,
-                  (double)local_pos.y,
-                  (double)local_pos.z,
-                  (double)gps.epv,
-                  (double)local_pos.vx,
-                  (double)local_pos.vy,
-                  (double)local_pos.vz,
-                  (double)airspeed.true_airspeed_m_s,
-                  (double)sensors.baro_alt_meter[0], // TO BE verified: Is it correct altitude?
-                  (double)sensors.accelerometer_m_s2[2],
-                  (double)sensors.gyro_rad_s[0],
-                  (double)bat_status.voltage_filtered_v,
-                  (double)attitude.pitch,
-                  (double)attitude.yaw);
+          //print radio inputs
+         printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t\n",
+              (double)(dbx_control_U.runtime/1000000),
+              (double)pwm_inputs.values[0],
+              (double)pwm_inputs.values[1],
+              (double)pwm_inputs.values[2],
+              (double)pwm_inputs.values[3],
+              (double)pwm_inputs.values[4],
+              (double)pwm_inputs.values[5],
+              (double)pwm_inputs.values[6],
+              (double)pwm_inputs.values[7]);
+//           // Sensors debuging and testing
+//           printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t\n",
+//                   (double)(dbx_control_U.runtime/1000000),
+//                   (double)local_pos.x,
+//                   (double)local_pos.y,
+//                   (double)local_pos.z,
+//                   (double)gps.epv,
+//                   (double)local_pos.vx,
+//                   (double)local_pos.vy,
+//                   (double)local_pos.vz,
+//                   (double)airspeed.true_airspeed_m_s,
+//                   (double)sensors.baro_alt_meter[0], // TO BE verified: Is it correct altitude?
+//                   (double)sensors.accelerometer_m_s2[2],
+//                   (double)sensors.gyro_rad_s[0],
+//                   (double)bat_status.voltage_filtered_v,
+//                   (double)attitude.pitch,
+//                   (double)attitude.yaw);
           i = 1;
         }
         // output pwm signals
