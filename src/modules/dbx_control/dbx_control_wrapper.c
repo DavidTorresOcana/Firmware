@@ -287,7 +287,7 @@ int simulink_main(int argc, char *argv[])
           i = i++;
         } else {
           // check arm state
-          if (dbx_control_Y.pwm_arm == 1 && pwm_enabled == 0) {
+          if (dbx_control_Y.pwm_arm == 1 && pwm_enabled == 0 && pwm_inputs.channel_count == 8) {
             // arm system
             pwm_enabled = 1;
             printf("\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\n");
@@ -397,7 +397,7 @@ int simulink_main(int argc, char *argv[])
           rgb_value.blue = dbx_control_Y.rgb_blue;
           ioctl(rgbled, RGBLED_SET_RGB, (unsigned long)&rgb_value);
           //print debug data
-         /*  printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t\n",
+          /*printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%i\n",
               (double)(dbx_control_U.runtime/1000000),
               (double)dbx_control_Y.debug1,
               (double)dbx_control_Y.debug2,
@@ -406,8 +406,36 @@ int simulink_main(int argc, char *argv[])
               (double)dbx_control_Y.debug5,
               (double)dbx_control_Y.debug6,
               (double)dbx_control_Y.debug7,
-              (double)dbx_control_Y.debug8); */
+              (double)dbx_control_Y.debug8,
+			  pwm_inputs.channel_count); */
+			  
+			// Print pwm outputs
+			printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
+				(int)(dbx_control_U.runtime/1000000),
+				(int)dbx_control_Y.pwm1,
+				(int)dbx_control_Y.pwm2,
+				(int)dbx_control_Y.pwm3,
+				(int)dbx_control_Y.pwm4,
+				(int)dbx_control_Y.pwm5,
+				(int)dbx_control_Y.pwm6,
+				(int)dbx_control_Y.pwm7,
+				(int)dbx_control_Y.pwm8,
+				pwm_inputs.channel_count);
+					  
+		/* 	// Print pwm inputs
+			printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
+				(int)(dbx_control_U.runtime/1000000),
+				pwm_inputs.values[0],
+				pwm_inputs.values[1],
+				pwm_inputs.values[2],
+				pwm_inputs.values[3],
+				pwm_inputs.values[4],
+				pwm_inputs.values[5],
+				pwm_inputs.values[6],
+				pwm_inputs.values[7],
+				pwm_inputs.channel_count); */
           
+         /*
           // Sensors debuging and testing
           printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t\n",
                   (double)(dbx_control_U.runtime/1000000),
@@ -424,11 +452,11 @@ int simulink_main(int argc, char *argv[])
                   (double)sensors.gyro_rad_s[0],
                   (double)bat_status.voltage_filtered_v,
                   (double)attitude.pitch,
-                  (double)attitude.yaw);
-          i = 1;
+                  (double)attitude.yaw); */
+        i = 1;
         }
         // output pwm signals
-        if (pwm_enabled == 1) {
+        if (pwm_enabled == 1 && pwm_inputs.channel_count == 8) {
           ioctl(pwm, PWM_SERVO_SET(0), dbx_control_Y.pwm1);
           ioctl(pwm, PWM_SERVO_SET(1), dbx_control_Y.pwm2);
           ioctl(pwm, PWM_SERVO_SET(2), dbx_control_Y.pwm3);
@@ -438,14 +466,7 @@ int simulink_main(int argc, char *argv[])
           ioctl(pwm, PWM_SERVO_SET(6), dbx_control_Y.pwm7);
           ioctl(pwm, PWM_SERVO_SET(7), dbx_control_Y.pwm8);
         } else {
-          ioctl(pwm, PWM_SERVO_SET(0), 900);
-          ioctl(pwm, PWM_SERVO_SET(1), 900);
-          ioctl(pwm, PWM_SERVO_SET(2), 900);
-          ioctl(pwm, PWM_SERVO_SET(3), 1500);
-          ioctl(pwm, PWM_SERVO_SET(4), 1500);
-          ioctl(pwm, PWM_SERVO_SET(5), 1500);
-          ioctl(pwm, PWM_SERVO_SET(6), 1600); // Disarmed indication
-          ioctl(pwm, PWM_SERVO_SET(7), 1500);
+          failsafe_pwm(pwm);
         }
         // execute simulink code
         dbx_control_step();
@@ -453,14 +474,7 @@ int simulink_main(int argc, char *argv[])
     }
   }
   // disable pwm outputs
-  ioctl(pwm, PWM_SERVO_SET(0), 900);
-  ioctl(pwm, PWM_SERVO_SET(1), 900);
-  ioctl(pwm, PWM_SERVO_SET(2), 900);
-  ioctl(pwm, PWM_SERVO_SET(3), 1500);
-  ioctl(pwm, PWM_SERVO_SET(4), 1500);
-  ioctl(pwm, PWM_SERVO_SET(5), 1500);
-  ioctl(pwm, PWM_SERVO_SET(6), 1600); // Disarmed indication
-  ioctl(pwm, PWM_SERVO_SET(7), 1500);
+  failsafe_pwm(pwm);
   ioctl(pwm, PWM_SERVO_DISARM, 0);
   // disable LEDs
   led_off(LED_BLUE);
@@ -486,6 +500,7 @@ int dbx_control_main(int argc, char *argv[])
       10240,
       simulink_main,
       NULL);
+      PX4_INFO("dbx_control started");
     exit(0);
   }
 
@@ -497,3 +512,16 @@ int dbx_control_main(int argc, char *argv[])
 
   exit(1);
 }
+
+int failsafe_pwm(int pwm) {
+	  ioctl(pwm, PWM_SERVO_SET(0), 900);
+	  ioctl(pwm, PWM_SERVO_SET(1), 900);
+	  ioctl(pwm, PWM_SERVO_SET(2), 900);
+	  ioctl(pwm, PWM_SERVO_SET(3), 1500);
+	  ioctl(pwm, PWM_SERVO_SET(4), 900);
+	  ioctl(pwm, PWM_SERVO_SET(5), 900);
+	  ioctl(pwm, PWM_SERVO_SET(6), 1600); // Disarmed indication
+	  ioctl(pwm, PWM_SERVO_SET(7), 1500);
+	  return(1);
+}
+
