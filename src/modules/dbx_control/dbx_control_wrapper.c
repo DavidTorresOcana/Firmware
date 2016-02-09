@@ -464,7 +464,16 @@ int simulink_main(int argc, char *argv[])
 						ioctl(pwm, PWM_SERVO_SET(6), dbx_control_Y.pwm7);
 						ioctl(pwm, PWM_SERVO_SET(7), dbx_control_Y.pwm8);
 					} else {
-						failsafe_pwm(pwm);
+						// MATLAB INPUT FAILSAFE
+						dbx_control_U.ch1 = 1500;
+						dbx_control_U.ch2 = 1500;
+						dbx_control_U.ch3 = 1000;
+						dbx_control_U.ch4 = 1500;
+						dbx_control_U.ch5 = 1000;
+						dbx_control_U.ch6 = 1000;
+						dbx_control_U.ch7 = 0;
+						dbx_control_U.ch8 = 0;						
+						failsafe_pwm_output(pwm);
 					}
 					// execute simulink code
 					dbx_control_step();
@@ -511,13 +520,13 @@ int dbx_control_main(int argc, char *argv[])
 	exit(1);
 }
 
-int failsafe_pwm(int pwm) {
+int failsafe_pwm_output(int pwm) {
 	ioctl(pwm, PWM_SERVO_SET(0), 900);
 	ioctl(pwm, PWM_SERVO_SET(1), 900);
 	ioctl(pwm, PWM_SERVO_SET(2), 900);
 	ioctl(pwm, PWM_SERVO_SET(3), 1500);
-	ioctl(pwm, PWM_SERVO_SET(4), 900);
-	ioctl(pwm, PWM_SERVO_SET(5), 900);
+	ioctl(pwm, PWM_SERVO_SET(4), 1500);
+	ioctl(pwm, PWM_SERVO_SET(5), 1500);
 	ioctl(pwm, PWM_SERVO_SET(6), 1600); // Disarmed indication
 	ioctl(pwm, PWM_SERVO_SET(7), 1500);
 	return(1);
@@ -590,7 +599,6 @@ int dbx_test_rc(int ms)
 					/* key pressed, bye bye */
 					return 0;
 				}
-
 			}
 		}
 
