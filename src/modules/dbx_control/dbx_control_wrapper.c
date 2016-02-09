@@ -27,6 +27,7 @@
 #include <drivers/drv_rgbled.h>
 #include <drivers/drv_pwm_output.h>
 #include <drivers/drv_rc_input.h>
+#include <drivers/drv_tone_alarm.h>
 #include <drivers/drv_hrt.h>
 #include <systemlib/systemlib.h>
 
@@ -40,6 +41,7 @@ __EXPORT int simulink_main(int argc, char *argv[]);
 
 const char *dev_rgbled = RGBLED0_DEVICE_PATH;
 const char *dev_pwm = PWM_OUTPUT0_DEVICE_PATH;
+const char *h_buzzer = TONEALARM0_DEVICE_PATH;
 
 static int simulink_task;
 static bool thread_exit;
@@ -210,6 +212,7 @@ int simulink_main(int argc, char *argv[])
 	// declare output devices
 	int rgbled = open(dev_rgbled, 0);
 	int pwm = open(dev_pwm, 0);
+	int buzzer = open(h_buzzer, 0);
 	// Declare here the other AUX PWM outputs???
 
 	// initialize outputs
@@ -234,7 +237,7 @@ int simulink_main(int argc, char *argv[])
 					orb_copy(ORB_ID(vehicle_gps_position), gps_sub, &gps);
 					orb_copy(ORB_ID(input_rc), pwm_inputs_sub, &pwm_inputs);
 					orb_copy(ORB_ID(battery_status), bat_status_sub, &bat_status);
-					orb_copy(ORB_ID(airspeed), airspeed_sub, &airspeed)>
+					orb_copy(ORB_ID(airspeed), airspeed_sub, &airspeed);
 					orb_copy(ORB_ID(vehicle_local_position), local_pos_sub, &local_pos);
 
 					dbx_control_U.runtime = hrt_absolute_time();
@@ -289,6 +292,8 @@ int simulink_main(int argc, char *argv[])
 						if (dbx_control_Y.pwm_arm == 1 && pwm_enabled == 0 && pwm_inputs.channel_count == 8) {
 							// arm system
 							pwm_enabled = 1;
+							ioctl(buzzer, DURATION_REPEAT , 2);
+							ioctl(buzzer, TONE_SET_ALARM, 7);
 							printf("\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\n");
 						} else if (dbx_control_Y.pwm_arm == 0 && pwm_enabled == 1) {
 							// disarm system
@@ -301,6 +306,8 @@ int simulink_main(int argc, char *argv[])
 							ioctl(pwm, PWM_SERVO_SET(6), 1600);
 							ioctl(pwm, PWM_SERVO_SET(7), 1500);
 							pwm_enabled = 0;
+							ioctl(buzzer, DURATION_REPEAT , 2);
+							ioctl(buzzer, TONE_SET_ALARM, 8);
 							printf("\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\n");
 						}
 
@@ -360,13 +367,13 @@ int simulink_main(int argc, char *argv[])
 						dbx_control_P.Flaps_ang_deg  	= GCS_parameters.Flaps_deg;
 
 						dbx_control_P.PID_theta_Kp  	= GCS_parameters.PID_theta_Kp;
-						dbx_control_P.PID_phi_Kp  	= GCS_parameters.PID_phi_Kp;
+						dbx_control_P.PID_phi_Kp  		= GCS_parameters.PID_phi_Kp;
 
 						dbx_control_P.PID_theta_Ki  	= GCS_parameters.PID_theta_Ki;
-						dbx_control_P.PID_phi_Ki  	= GCS_parameters.PID_phi_Ki;
+						dbx_control_P.PID_phi_Ki  		= GCS_parameters.PID_phi_Ki;
 
 						dbx_control_P.PID_theta_Kd  	= GCS_parameters.PID_theta_Kd;
-						dbx_control_P.PID_phi_Kd  	= GCS_parameters.PID_phi_Kd;
+						dbx_control_P.PID_phi_Kd  		= GCS_parameters.PID_phi_Kd;
 
 						dbx_control_P.PID_theta_dot_Kp  = GCS_parameters.PID_theta_dot_Kp;
 						dbx_control_P.PID_phi_dot_Kp  	= GCS_parameters.PID_phi_dot_Kp;
@@ -394,8 +401,9 @@ int simulink_main(int argc, char *argv[])
 						rgb_value.green = dbx_control_Y.rgb_green;
 						rgb_value.blue = dbx_control_Y.rgb_blue;
 						ioctl(rgbled, RGBLED_SET_RGB, (unsigned long)&rgb_value);
+						
 						//print debug data
-						/*printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%i\n",
+						printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%i\n",
 						(double)(dbx_control_U.runtime/1000000),
 						(double)dbx_control_Y.debug1,
 						(double)dbx_control_Y.debug2,
@@ -405,10 +413,10 @@ int simulink_main(int argc, char *argv[])
 						(double)dbx_control_Y.debug6,
 						(double)dbx_control_Y.debug7,
 						(double)dbx_control_Y.debug8,
-						pwm_inputs.channel_count); */
+						pwm_inputs.channel_count); 
 						
-						// Print pwm outputs
-						printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
+						// Print Simulink outputs
+						/* printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
 						(int)(dbx_control_U.runtime/1000000),
 						(int)dbx_control_Y.pwm1,
 						(int)dbx_control_Y.pwm2,
@@ -418,9 +426,9 @@ int simulink_main(int argc, char *argv[])
 						(int)dbx_control_Y.pwm6,
 						(int)dbx_control_Y.pwm7,
 						(int)dbx_control_Y.pwm8,
-						pwm_inputs.channel_count);
+						pwm_inputs.channel_count); */
 						
-						/* 	// Print pwm inputs
+						/* 	// Print Radio pwm inputs
 						printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
 						(int)(dbx_control_U.runtime/1000000),
 						pwm_inputs.values[0],
@@ -453,6 +461,18 @@ int simulink_main(int argc, char *argv[])
 						(double)attitude.yaw); */
 						i = 1;
 					}
+					
+					// MATLAB INPUT FAILSAFE
+					if (pwm_inputs.channel_count != 8) {
+						dbx_control_U.ch1 = 1500;
+						dbx_control_U.ch2 = 1500;
+						dbx_control_U.ch3 = 1000;
+						dbx_control_U.ch4 = 1500;
+						dbx_control_U.ch5 = 1000;
+						dbx_control_U.ch6 = 1000;
+						dbx_control_U.ch7 = 0;
+					}
+					
 					// output pwm signals
 					if (pwm_enabled == 1 && pwm_inputs.channel_count == 8) {
 						ioctl(pwm, PWM_SERVO_SET(0), dbx_control_Y.pwm1);
@@ -463,16 +483,7 @@ int simulink_main(int argc, char *argv[])
 						ioctl(pwm, PWM_SERVO_SET(5), dbx_control_Y.pwm6);
 						ioctl(pwm, PWM_SERVO_SET(6), dbx_control_Y.pwm7);
 						ioctl(pwm, PWM_SERVO_SET(7), dbx_control_Y.pwm8);
-					} else {
-						// MATLAB INPUT FAILSAFE
-						dbx_control_U.ch1 = 1500;
-						dbx_control_U.ch2 = 1500;
-						dbx_control_U.ch3 = 1000;
-						dbx_control_U.ch4 = 1500;
-						dbx_control_U.ch5 = 1000;
-						dbx_control_U.ch6 = 1000;
-						dbx_control_U.ch7 = 0;
-						dbx_control_U.ch8 = 0;						
+					} else { // Disarmed or failsafe					
 						failsafe_pwm_output(pwm);
 					}
 					// execute simulink code
@@ -482,7 +493,7 @@ int simulink_main(int argc, char *argv[])
 		}
 	}
 	// disable pwm outputs
-	failsafe_pwm(pwm);
+	failsafe_pwm_output(pwm);
 	ioctl(pwm, PWM_SERVO_DISARM, 0);
 	// disable LEDs
 	led_off(LED_BLUE);
@@ -535,6 +546,7 @@ int failsafe_pwm_output(int pwm) {
 int dbx_test_rc(int ms)
 {	int _rc_sub = orb_subscribe(ORB_ID(input_rc));
 
+	int buzzer = open(h_buzzer, 0);
 	/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
 	struct rc_input_values	rc_input;
 	struct rc_input_values	rc_last;
@@ -577,6 +589,8 @@ int dbx_test_rc(int ms)
 						if (abs(rc_input.values[i] - rc_last.values[i]) > 20) {
 							PX4_ERR("comparison fail: RC: %d, expected: %d", rc_input.values[i], rc_last.values[i]);
 							(void)close(_rc_sub);
+							ioctl(buzzer, DURATION_REPEAT , 10);
+							ioctl(buzzer, TONE_SET_ALARM, 9);
 							return 1;
 						}
 
@@ -586,12 +600,16 @@ int dbx_test_rc(int ms)
 					if (rc_last.channel_count != rc_input.channel_count) {
 						PX4_ERR("channel count mismatch: last: %d, now: %d", rc_last.channel_count, rc_input.channel_count);
 						(void)close(_rc_sub);
+						ioctl(buzzer, DURATION_REPEAT , 10);
+						ioctl(buzzer, TONE_SET_ALARM, 9);
 						return 1;
 					}
 
 					if (hrt_absolute_time() - rc_input.timestamp_last_signal > 100000) {
 						PX4_ERR("TIMEOUT, less than 10 Hz updates");
 						(void)close(_rc_sub);
+						ioctl(buzzer, DURATION_REPEAT , 10);
+						ioctl(buzzer, TONE_SET_ALARM, 9);
 						return 1;
 					}
 
