@@ -292,8 +292,7 @@ int simulink_main(int argc, char *argv[])
 						if (dbx_control_Y.pwm_arm == 1 && pwm_enabled == 0 && pwm_inputs.channel_count == 8) {
 							// arm system
 							pwm_enabled = 1;
-							ioctl(buzzer, DURATION_REPEAT , 2);
-							ioctl(buzzer, TONE_SET_ALARM, 7);
+							ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_WARNING_TUNE);
 							printf("\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\n");
 						} else if (dbx_control_Y.pwm_arm == 0 && pwm_enabled == 1) {
 							// disarm system
@@ -306,8 +305,7 @@ int simulink_main(int argc, char *argv[])
 							ioctl(pwm, PWM_SERVO_SET(6), 1600);
 							ioctl(pwm, PWM_SERVO_SET(7), 1500);
 							pwm_enabled = 0;
-							ioctl(buzzer, DURATION_REPEAT , 2);
-							ioctl(buzzer, TONE_SET_ALARM, 8);
+							ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 							printf("\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\n");
 						}
 
@@ -589,8 +587,7 @@ int dbx_test_rc(int ms)
 						if (abs(rc_input.values[i] - rc_last.values[i]) > 20) {
 							PX4_ERR("comparison fail: RC: %d, expected: %d", rc_input.values[i], rc_last.values[i]);
 							(void)close(_rc_sub);
-							ioctl(buzzer, DURATION_REPEAT , 10);
-							ioctl(buzzer, TONE_SET_ALARM, 9);
+							ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 							return 1;
 						}
 
@@ -600,16 +597,14 @@ int dbx_test_rc(int ms)
 					if (rc_last.channel_count != rc_input.channel_count) {
 						PX4_ERR("channel count mismatch: last: %d, now: %d", rc_last.channel_count, rc_input.channel_count);
 						(void)close(_rc_sub);
-						ioctl(buzzer, DURATION_REPEAT , 10);
-						ioctl(buzzer, TONE_SET_ALARM, 9);
+						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 						return 1;
 					}
 
 					if (hrt_absolute_time() - rc_input.timestamp_last_signal > 100000) {
 						PX4_ERR("TIMEOUT, less than 10 Hz updates");
 						(void)close(_rc_sub);
-						ioctl(buzzer, DURATION_REPEAT , 10);
-						ioctl(buzzer, TONE_SET_ALARM, 9);
+						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 						return 1;
 					}
 
@@ -624,7 +619,7 @@ int dbx_test_rc(int ms)
 		PX4_ERR("failed reading RC input data");
 		return 1;
 	}
-
+	ioctl(buzzer, TONE_SET_ALARM, TONE_STARTUP_TUNE);
 	PX4_INFO("RC IN CONTINUITY TEST PASSED SUCCESSFULLY!");
 	return 0;
 }
