@@ -64,7 +64,7 @@ set(config_module_list
 	systemcmds/mtd
 	systemcmds/dumpfile
 	systemcmds/ver
-	systemcmds/tests
+	#systemcmds/tests
 
 	#
 	# General system control
@@ -80,10 +80,10 @@ set(config_module_list
 	# Estimation modules (EKF/ SO3 / other filters)
 	#
 	# Too high RAM usage due to static allocations
-	# modules/attitude_estimator_ekf
+	#modules/attitude_estimator_ekf
 	modules/attitude_estimator_q
 	modules/ekf_att_pos_estimator
-	#modules/position_estimator_inav
+	modules/position_estimator_inav
 
 	#
 	# Vehicle Control
@@ -94,7 +94,7 @@ set(config_module_list
 	#modules/mc_att_control
 	#modules/mc_pos_control
 	#modules/vtol_att_control
-    	modules/dbx_control
+    modules/dbx_control
 
 	#
 	# Logging

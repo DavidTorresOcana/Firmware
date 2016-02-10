@@ -21,15 +21,15 @@ echo "commander"
 #
 # Stop MC controllers (los has empezado al configurar por defecto como un MC)
 #
-mc_att_control stop
-mc_pos_control stop
+#mc_att_control stop
+#mc_pos_control stop
 echo "MCs out"
 usleep 1000
 
 #
 # Stop land detector
 #
-land_detector stop
+#land_detector stop
 echo "Land out"
 #
 # INAV stimator

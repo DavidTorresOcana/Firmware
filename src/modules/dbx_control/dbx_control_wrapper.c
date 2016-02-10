@@ -225,7 +225,8 @@ int simulink_main(int argc, char *argv[])
 		{ .fd = sensors_sub, .events = POLLIN },
 	};
 
-	if(!dbx_test_rc(3000)) {
+	uint64_t test_time = 3000000; // Test time us
+	if(!dbx_test_rc(test_time)) {
 		// primary application thread
 		while (!thread_exit) {
 			int poll_return = poll(fds, 1, 1000);
@@ -399,20 +400,20 @@ int simulink_main(int argc, char *argv[])
 						rgb_value.green = dbx_control_Y.rgb_green;
 						rgb_value.blue = dbx_control_Y.rgb_blue;
 						ioctl(rgbled, RGBLED_SET_RGB, (unsigned long)&rgb_value);
-						
-						//print debug data
-						printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%i\n",
-						(double)(dbx_control_U.runtime/1000000),
-						(double)dbx_control_Y.debug1,
-						(double)dbx_control_Y.debug2,
-						(double)dbx_control_Y.debug3,
-						(double)dbx_control_Y.debug4,
-						(double)dbx_control_Y.debug5,
-						(double)dbx_control_Y.debug6,
-						(double)dbx_control_Y.debug7,
-						(double)dbx_control_Y.debug8,
-						pwm_inputs.channel_count); 
-						
+
+						// //print debug data
+						// printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%i\n",
+						// (double)(dbx_control_U.runtime/1000000),
+						// (double)dbx_control_Y.debug1,
+						// (double)dbx_control_Y.debug2,
+						// (double)dbx_control_Y.debug3,
+						// (double)dbx_control_Y.debug4,
+						// (double)dbx_control_Y.debug5,
+						// (double)dbx_control_Y.debug6,
+						// (double)dbx_control_Y.debug7,
+						// (double)dbx_control_Y.debug8,
+						// pwm_inputs.channel_count);
+
 						// Print Simulink outputs
 						/* printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
 						(int)(dbx_control_U.runtime/1000000),
@@ -425,8 +426,8 @@ int simulink_main(int argc, char *argv[])
 						(int)dbx_control_Y.pwm7,
 						(int)dbx_control_Y.pwm8,
 						pwm_inputs.channel_count); */
-						
-						/* 	// Print Radio pwm inputs
+
+						// Print Radio pwm inputs
 						printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
 						(int)(dbx_control_U.runtime/1000000),
 						pwm_inputs.values[0],
@@ -437,8 +438,8 @@ int simulink_main(int argc, char *argv[])
 						pwm_inputs.values[5],
 						pwm_inputs.values[6],
 						pwm_inputs.values[7],
-						pwm_inputs.channel_count); */
-						
+						pwm_inputs.channel_count);
+
 						/*
 						// Sensors debuging and testing
 						printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t\n",
@@ -459,7 +460,7 @@ int simulink_main(int argc, char *argv[])
 						(double)attitude.yaw); */
 						i = 1;
 					}
-					
+
 					// MATLAB INPUT FAILSAFE
 					if (pwm_inputs.channel_count != 8) {
 						dbx_control_U.ch1 = 1500;
@@ -470,7 +471,7 @@ int simulink_main(int argc, char *argv[])
 						dbx_control_U.ch6 = 1000;
 						dbx_control_U.ch7 = 0;
 					}
-					
+
 					// output pwm signals
 					if (pwm_enabled == 1 && pwm_inputs.channel_count == 8) {
 						ioctl(pwm, PWM_SERVO_SET(0), dbx_control_Y.pwm1);
@@ -481,7 +482,7 @@ int simulink_main(int argc, char *argv[])
 						ioctl(pwm, PWM_SERVO_SET(5), dbx_control_Y.pwm6);
 						ioctl(pwm, PWM_SERVO_SET(6), dbx_control_Y.pwm7);
 						ioctl(pwm, PWM_SERVO_SET(7), dbx_control_Y.pwm8);
-					} else { // Disarmed or failsafe					
+					} else { // Disarmed or failsafe
 						failsafe_pwm_output(pwm);
 					}
 					// execute simulink code
@@ -541,7 +542,7 @@ int failsafe_pwm_output(int pwm) {
 	return(1);
 }
 
-int dbx_test_rc(int ms)
+int dbx_test_rc(uint64_t us)
 {	int _rc_sub = orb_subscribe(ORB_ID(input_rc));
 
 	int buzzer = open(h_buzzer, 0);
@@ -570,16 +571,19 @@ int dbx_test_rc(int ms)
 		struct pollfd fds[1];
 		fds[0].fd = _rc_sub;
 		fds[0].events = POLLIN;
-		
+
 		uint64_t rc_start_time = hrt_absolute_time();
 
-		while (hrt_absolute_time() - rc_start_time > ms * 1000) {
+		while (hrt_absolute_time() - rc_start_time < us) {
+			printf("%f\t%f\t%f\t%f\n",
+				(float)hrt_absolute_time(),
+				(float)rc_start_time,
+				(float)(us),
+				(float)(hrt_absolute_time() - rc_start_time));
 			int ret = poll(fds, 2, 200);
 
 			if (ret > 0) {
-
 				if (fds[0].revents & POLLIN) {
-
 					orb_copy(ORB_ID(input_rc), _rc_sub, &rc_input);
 
 					/* go and check values */
@@ -610,7 +614,7 @@ int dbx_test_rc(int ms)
 
 				} else {
 					/* key pressed, bye bye */
-					return 0;
+					return 1;
 				}
 			}
 		}
