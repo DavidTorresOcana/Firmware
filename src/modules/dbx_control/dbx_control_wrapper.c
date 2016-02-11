@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+#include "commander/commander_helper.h"
 
 #include <uORB/uORB.h>
 #include <uORB/topics/vehicle_attitude_setpoint.h>
@@ -42,6 +45,11 @@ __EXPORT int simulink_main(int argc, char *argv[]);
 const char *dev_rgbled = RGBLED0_DEVICE_PATH;
 const char *dev_pwm = PWM_OUTPUT0_DEVICE_PATH;
 const char *h_buzzer = TONEALARM0_DEVICE_PATH;
+
+// Declare output devices
+int rgbled;
+int pwm;
+int buzzer;
 
 static int simulink_task;
 static bool thread_exit;
@@ -209,10 +217,10 @@ int simulink_main(int argc, char *argv[])
 	orb_set_interval(attitude_sub, step_size);
 	orb_set_interval(airspeed_sub, step_size);
 
-	// declare output devices
-	int rgbled = open(dev_rgbled, 0);
-	int pwm = open(dev_pwm, 0);
-	int buzzer = open(h_buzzer, 0);
+	// initialize output devices
+	rgbled = open(dev_rgbled, 0);
+	pwm = open(dev_pwm, 0);
+	buzzer = open(h_buzzer, 0);
 	// Declare here the other AUX PWM outputs???
 
 	// initialize outputs
@@ -225,7 +233,7 @@ int simulink_main(int argc, char *argv[])
 		{ .fd = sensors_sub, .events = POLLIN },
 	};
 
-	uint64_t test_time = 3000000; // Test time us
+	int test_time = 3000; // Test time ms
 	if(!dbx_test_rc(test_time)) {
 		// primary application thread
 		while (!thread_exit) {
@@ -542,14 +550,16 @@ int failsafe_pwm_output(int pwm) {
 	return(1);
 }
 
-int dbx_test_rc(uint64_t us)
-{	int _rc_sub = orb_subscribe(ORB_ID(input_rc));
 
-	int buzzer = open(h_buzzer, 0);
+int dbx_test_rc(int duration)
+{	int _rc_sub = orb_subscribe(ORB_ID(input_rc));
+		
+	//int buzzer = open(h_buzzer, 0);
 	/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
 	struct rc_input_values	rc_input;
 	struct rc_input_values	rc_last;
 	orb_copy(ORB_ID(input_rc), _rc_sub, &rc_input);
+	PX4_INFO("Input RC read %i", (int)rc_input.values[1]);
 	usleep(100000);
 
 	/* open PPM input and expect values close to the output values */
@@ -561,31 +571,35 @@ int dbx_test_rc(uint64_t us)
 
 	if (rc_updated) {
 		/* copy initial set */
-		for (unsigned i = 0; i < rc_input.channel_count; i++) {
-			rc_last.values[i] = rc_input.values[i];
+		for (unsigned j = 0; j < rc_input.channel_count; j++) {
+			rc_last.values[j] = rc_input.values[j];
 		}
 
 		rc_last.channel_count = rc_input.channel_count;
 
+
+		struct pollfd rc_fds[] = {
+		{
+			.fd = _rc_sub,
+			.events = POLLIN },
+		};
 		/* poll descriptor */
-		struct pollfd fds[1];
-		fds[0].fd = _rc_sub;
-		fds[0].events = POLLIN;
+		//struct pollfd fds[2];
+		//fds[0].fd = _rc_sub;
+		//fds[0].events = POLLIN;
+		//fds[1].fd = 0;
+		//fds[1].events = POLLIN;
 
 		uint64_t rc_start_time = hrt_absolute_time();
-
-		while (hrt_absolute_time() - rc_start_time < us) {
-			printf("%f\t%f\t%f\t%f\n",
-				(float)hrt_absolute_time(),
-				(float)rc_start_time,
-				(float)(us),
-				(float)(hrt_absolute_time() - rc_start_time));
-			int ret = poll(fds, 2, 200);
-
+		while (hrt_absolute_time() - rc_start_time < (uint64_t)(duration * 1000)) {
+			PX4_INFO("I heard: [%" PRIu64 "\t%" PRIu64 "]]", (hrt_absolute_time() - rc_start_time), (uint64_t)(duration * 1000));
+			
+			int ret = poll(rc_fds, 1, 200);
+			PX4_INFO("Poll finished with result %i", ret);
 			if (ret > 0) {
-				if (fds[0].revents & POLLIN) {
+				if (rc_fds[0].revents & POLLIN) {
 					orb_copy(ORB_ID(input_rc), _rc_sub, &rc_input);
-
+					PX4_INFO("Input RC read %i", (int)rc_input.values[1]);
 					/* go and check values */
 					for (unsigned i = 0; i < rc_input.channel_count; i++) {
 						if (abs(rc_input.values[i] - rc_last.values[i]) > 20) {
@@ -621,6 +635,8 @@ int dbx_test_rc(uint64_t us)
 
 	} else {
 		PX4_ERR("failed reading RC input data");
+		(void)close(_rc_sub);
+		ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 		return 1;
 	}
 	ioctl(buzzer, TONE_SET_ALARM, TONE_STARTUP_TUNE);
