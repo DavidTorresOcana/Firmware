@@ -249,6 +249,13 @@ int simulink_main(int argc, char *argv[])
 					orb_copy(ORB_ID(airspeed), airspeed_sub, &airspeed);
 					orb_copy(ORB_ID(vehicle_local_position), local_pos_sub, &local_pos);
 
+					// Filtering noise in PWM Radio inputs
+					for(int q=0;q<=7;q++) {
+						if(pwm_inputs.values[q]<(rc_input_t) 1000) pwm_inputs.values[q]= (rc_input_t) 1000;
+						if(pwm_inputs.values[q]>(rc_input_t) 2000) pwm_inputs.values[q]= (rc_input_t) 2000;
+					}
+
+					// Declare Simulink inputs
 					dbx_control_U.runtime = hrt_absolute_time();
 					dbx_control_U.mag_x = sensors.magnetometer_ga[0];
 					dbx_control_U.mag_y = sensors.magnetometer_ga[1];
