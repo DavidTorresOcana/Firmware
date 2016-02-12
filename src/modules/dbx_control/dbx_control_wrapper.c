@@ -119,9 +119,9 @@ int simulink_main(int argc, char *argv[])
 	//   int global_vel_sp_sub = orb_subscribe(ORB_ID(vehicle_global_velocity_setpoint));
 
 	// Declare data structs from subcriptions
-	struct sensor_combined_s 	sensors;
-	struct rc_input_values 		pwm_inputs;
-	struct vehicle_attitude_s 	attitude;
+	struct sensor_combined_s        sensors;
+	struct rc_input_values          pwm_inputs;
+	struct vehicle_attitude_s       attitude;
 	struct vehicle_gps_position_s 	gps;
 	struct battery_status_s         bat_status;
 	struct airspeed_s               airspeed;
@@ -468,7 +468,7 @@ int simulink_main(int argc, char *argv[])
 						(double)attitude.yaw); */
 						i = 1;
 					}
-
+                    
 					// MATLAB INPUT FAILSAFE
 					if (pwm_inputs.channel_count != 8) {
 						dbx_control_U.ch1 = 1500;
@@ -600,7 +600,8 @@ int dbx_test_rc(int duration)
 				if (rc_fds[0].revents & POLLIN) {
 					orb_copy(ORB_ID(input_rc), _rc_sub, &rc_input);
 					PX4_INFO("Input RC read %i", (int)rc_input.values[1]);
-					/* go and check values */
+                    
+					// Out-of-bounds check
 					for (unsigned i = 0; i < rc_input.channel_count; i++) {
 						if (abs(rc_input.values[i] - rc_last.values[i]) > 20) {
 							PX4_ERR("comparison fail: RC: %d, expected: %d", rc_input.values[i], rc_last.values[i]);
@@ -611,21 +612,28 @@ int dbx_test_rc(int duration)
 
 						rc_last.values[i] = rc_input.values[i];
 					}
-
+                    // Channel count check
 					if (rc_last.channel_count != rc_input.channel_count) {
 						PX4_ERR("channel count mismatch: last: %d, now: %d", rc_last.channel_count, rc_input.channel_count);
 						(void)close(_rc_sub);
 						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 						return 1;
 					}
-
+                    // Frequency check
 					if (hrt_absolute_time() - rc_input.timestamp_last_signal > 100000) {
 						PX4_ERR("TIMEOUT, less than 10 Hz updates");
 						(void)close(_rc_sub);
 						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 						return 1;
 					}
-
+                    
+                    // Normal start Radio inputs check
+					if ( abs(rc_input.values[2] - 1000)<200 && abs(rc_input.values[4] - 1000)<200 && abs(rc_input.values[5] - 1000)<200) {
+						PX4_ERR(" Radio inputs are not safe for starting");
+						(void)close(_rc_sub);
+						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
+						return 1;
+					}
 				} else {
 					/* key pressed, bye bye */
 					return 1;
