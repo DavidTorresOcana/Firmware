@@ -443,17 +443,17 @@ int simulink_main(int argc, char *argv[])
 						pwm_inputs.channel_count); */
 
 						// Print Radio pwm inputs
-						printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
-						(int)(dbx_control_U.runtime/1000000),
-						pwm_inputs.values[0],
-						pwm_inputs.values[1],
-						pwm_inputs.values[2],
-						pwm_inputs.values[3],
-						pwm_inputs.values[4],
-						pwm_inputs.values[5],
-						pwm_inputs.values[6],
-						pwm_inputs.values[7],
-						pwm_inputs.channel_count);
+// 						printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
+// 						(int)(dbx_control_U.runtime/1000000),
+// 						pwm_inputs.values[0],
+// 						pwm_inputs.values[1],
+// 						pwm_inputs.values[2],
+// 						pwm_inputs.values[3],
+// 						pwm_inputs.values[4],
+// 						pwm_inputs.values[5],
+// 						pwm_inputs.values[6],
+// 						pwm_inputs.values[7],
+// 						pwm_inputs.channel_count);
 
 						/*
 						// Sensors debuging and testing
@@ -497,6 +497,19 @@ int simulink_main(int argc, char *argv[])
 						ioctl(pwm, PWM_SERVO_SET(5), dbx_control_Y.pwm6);
 						ioctl(pwm, PWM_SERVO_SET(6), dbx_control_Y.pwm7);
 						ioctl(pwm, PWM_SERVO_SET(7), dbx_control_Y.pwm8);
+                        
+                        printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
+						(int)(dbx_control_U.runtime/1000000),
+						(int)dbx_control_Y.pwm1,
+						(int)dbx_control_Y.pwm2,
+						(int)dbx_control_Y.pwm3,
+						(int)dbx_control_Y.pwm4,
+						(int)dbx_control_Y.pwm5,
+						(int)dbx_control_Y.pwm6,
+						(int)dbx_control_Y.pwm7,
+						(int)dbx_control_Y.pwm8,
+						pwm_inputs.channel_count);
+                        
 					} else { // Disarmed or failsafe
 						failsafe_pwm_output(pwm);
 					}
@@ -635,12 +648,13 @@ int dbx_test_rc(int duration)
 					}
                     
                     // Normal start Radio inputs check
-					if ( abs(rc_input.values[2] - 1000)<200 && abs(rc_input.values[4] - 1000)<200 && abs(rc_input.values[5] - 1000)<200) {
+					if ( abs(rc_input.values[2] - 1000)>200 && abs(rc_input.values[4] - 1000)>200 && abs(rc_input.values[5] - 1000)>200) {
 						PX4_ERR(" Radio inputs are not safe for starting");
 						(void)close(_rc_sub);
 						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 						return 1;
 					}
+                    
 				} else {
 					/* key pressed, bye bye */
 					return 1;
