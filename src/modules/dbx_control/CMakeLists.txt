@@ -7,7 +7,8 @@ px4_add_module(
 		-Os
         
 	SRCS
-		dbx_control_wrapper.c
+		dbx_control_main.c
+        dbx_control_params.c
 	DEPENDS
 		platforms__common
 	)
