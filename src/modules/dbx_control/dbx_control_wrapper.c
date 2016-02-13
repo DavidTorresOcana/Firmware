@@ -32,7 +32,10 @@
 #include <drivers/drv_rc_input.h>
 #include <drivers/drv_tone_alarm.h>
 #include <drivers/drv_hrt.h>
+
 #include <systemlib/systemlib.h>
+#include <systemlib/param/param.h>
+#include <systemlib/err.h>
 
 // Include the generated files and code of Simulink: Autopilot
 #include "dbx_control_ert_rtw/dbx_control.c"
@@ -172,45 +175,45 @@ int simulink_main(int argc, char *argv[])
 	}	GCS_comms_pointers;
 
 	// Get the pointers to GCS params
-	GCS_comms_pointers.Throtle_sens = param_find("DBX_Throtle_sens");
-	GCS_comms_pointers.Yaw_sens = param_find("DBX_Yaw_sens");
-	GCS_comms_pointers.Atti_sens = param_find("DBX_Atti_sens");
+	GCS_comms_pointers.Throtle_sens = param_find("DBX_THROTTLE_SENS");
+	GCS_comms_pointers.Yaw_sens = param_find("DBX_YAW_SENS");
+	GCS_comms_pointers.Atti_sens = param_find("DBX_ATTI_SENS");
 
-	GCS_comms_pointers.phi_tau = param_find("DBX_phi_tau");
-	GCS_comms_pointers.phi_K_b = param_find("DBX_phi_K_b");
-	GCS_comms_pointers.phi_f_i = param_find("DBX_phi_f_i");
+	GCS_comms_pointers.phi_tau = param_find("DBX_PHI_TAU");
+	GCS_comms_pointers.phi_K_b = param_find("DBX_PHI_K_B");
+	GCS_comms_pointers.phi_f_i = param_find("DBX_PHI_F_I");
 
-	GCS_comms_pointers.theta_tau = param_find("DBX_theta_tau");
-	GCS_comms_pointers.theta_K_b = param_find("DBX_theta_K_b");
-	GCS_comms_pointers.theta_f_i = param_find("DBX_theta_f_i");
+	GCS_comms_pointers.theta_tau = param_find("DBX_THETA_TAU");
+	GCS_comms_pointers.theta_K_b = param_find("DBX_THETA_K_B");
+	GCS_comms_pointers.theta_f_i = param_find("DBX_THETA_F_I");
 
-	GCS_comms_pointers.psi_tau = param_find("DBX_psi_tau");
-	GCS_comms_pointers.psi_K_b = param_find("DBX_psi_K_b");
-	GCS_comms_pointers.psi_f_i = param_find("DBX_psi_f_i");
+	GCS_comms_pointers.psi_tau = param_find("DBX_PSI_TAU");
+	GCS_comms_pointers.psi_K_b = param_find("DBX_PSI_K_B");
+	GCS_comms_pointers.psi_f_i = param_find("DBX_PSI_F_I");
 
-	GCS_comms_pointers.p_tau = param_find("DBX_p_tau");
-	GCS_comms_pointers.p_K_b = param_find("DBX_p_K_b");
+	GCS_comms_pointers.p_tau = param_find("DBX_P_TAU");
+	GCS_comms_pointers.p_K_b = param_find("DBX_P_K_B");
 
-	GCS_comms_pointers.q_tau = param_find("DBX_q_tau");
-	GCS_comms_pointers.q_K_b = param_find("DBX_q_K_b");
+	GCS_comms_pointers.q_tau = param_find("DBX_Q_TAU");
+	GCS_comms_pointers.q_K_b = param_find("DBX_Q_K_B");
 
-	GCS_comms_pointers.r_tau = param_find("DBX_r_tau");
-	GCS_comms_pointers.r_K_b = param_find("DBX_r_K_b");
+	GCS_comms_pointers.r_tau = param_find("DBX_R_TAU");
+	GCS_comms_pointers.r_K_b = param_find("DBX_R_K_B");
 
-	GCS_comms_pointers.Flaps_deg = param_find("DBX_Flaps_deg");
+	GCS_comms_pointers.Flaps_deg = param_find("DBX_FLAPS_DEG");
 
-	GCS_comms_pointers.PID_theta_Kp = param_find("DBXcl_theta_Kp");
-	GCS_comms_pointers.PID_phi_Kp = param_find("DBXcl_phi_Kp");
-	GCS_comms_pointers.PID_theta_Ki = param_find("DBXcl_theta_Ki");
-	GCS_comms_pointers.PID_phi_Ki = param_find("DBXcl_phi_Ki");
-	GCS_comms_pointers.PID_theta_Kd = param_find("DBXcl_theta_Kd");
-	GCS_comms_pointers.PID_phi_Kd = param_find("DBXcl_phi_Kd");
-	GCS_comms_pointers.PID_theta_dot_Kp = param_find("DBXcl_theta_dot_Kp");
-	GCS_comms_pointers.PID_phi_dot_Kp = param_find("DBXcl_phi_dot_Kp");
-	GCS_comms_pointers.PID_theta_dot_Ki = param_find("DBXcl_theta_dot_Ki");
-	GCS_comms_pointers.PID_phi_dot_Ki = param_find("DBXcl_phi_dot_Ki");
-	GCS_comms_pointers.PID_theta_dot_Kd = param_find("DBXcl_theta_dot_Kd");
-	GCS_comms_pointers.PID_phi_dot_Kd = param_find("DBXcl_phi_dot_Kd");
+	GCS_comms_pointers.PID_theta_Kp = param_find("DBX_CL_THETA_KP");
+	GCS_comms_pointers.PID_phi_Kp = param_find("DBX_CL_PHI_KP");
+	GCS_comms_pointers.PID_theta_Ki = param_find("DBX_CL_THETA_KI");
+	GCS_comms_pointers.PID_phi_Ki = param_find("DBX_CL_PHI_KI");
+	GCS_comms_pointers.PID_theta_Kd = param_find("DBX_CL_THETA_KD");
+	GCS_comms_pointers.PID_phi_Kd = param_find("DBX_CL_PHI_KD");
+	GCS_comms_pointers.PID_theta_dot_Kp = param_find("DBX_CL_THETA_DOT_KP");
+	GCS_comms_pointers.PID_phi_dot_Kp = param_find("DBX_CL_PHI_DOT_KP");
+	GCS_comms_pointers.PID_theta_dot_Ki = param_find("DBX_CL_THETA_DOT_KI");
+	GCS_comms_pointers.PID_phi_dot_Ki = param_find("DBX_CL_PHI_DOT_KI");
+	GCS_comms_pointers.PID_theta_dot_Kd = param_find("DBX_CL_THETA_DOT_KD");
+	GCS_comms_pointers.PID_phi_dot_Kd = param_find("DBX_CL_PHI_DOT_KD");
 
 	// Limiting the update rate
 	orb_set_interval(sensors_sub, step_size);
@@ -362,7 +365,7 @@ int simulink_main(int argc, char *argv[])
 						// Declarar las ganancias de Simulink: se podria necesitar Casting!
 						dbx_control_P.Throtle_sens 	= GCS_parameters.Throtle_sens;
 						dbx_control_P.Yaw_sens  	= GCS_parameters.Yaw_sens;
-						dbx_control_P.Roll_pich_sens= GCS_parameters.Atti_sens;
+						dbx_control_P.Roll_pich_sens	= GCS_parameters.Atti_sens;
 						dbx_control_P.phi_tau  		= GCS_parameters.phi_tau;
 						dbx_control_P.phi_K_b  		= GCS_parameters.phi_K_b;
 						dbx_control_P.phi_f_i  		= GCS_parameters.phi_f_i;

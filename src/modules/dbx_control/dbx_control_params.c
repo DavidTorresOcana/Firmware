@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2013, 2014 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2016 DBX Drones Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,7 +31,13 @@
  *
  ****************************************************************************/
 
-#include <nuttx/config.h>
+/**
+ * @file dbx_control_params.c
+ * DBX Control parameters
+ *
+ * @author Juan Herrero <jn.herrerom@gmail.com>
+ */
+#include <px4_config.h>
 #include <systemlib/param/param.h>
 
 /**
@@ -39,65 +45,71 @@
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_Throtle_sens, 5.0f);
+PARAM_DEFINE_FLOAT(DBX_THROTTLE_SENS, 5.0f);
 
 /**
  * Sensibildiad ginada en DEG
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_Yaw_sens, 20.0f);
+PARAM_DEFINE_FLOAT(DBX_YAW_SENS, 20.0f);
 
 /**
  * Sensibilidad de cabeceo y balanceo en DEG
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_Atti_sens, 10.0f);
+PARAM_DEFINE_FLOAT(DBX_ATTI_SENS, 10.0f);
 
 /**
  * Tiempo de respuesta PHI
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_phi_tau, 0.7f);
+PARAM_DEFINE_FLOAT(DBX_PHI_TAU, 0.7f);
 /**
  * Ganancia control PHI
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_phi_K_b, 3.0f);
+PARAM_DEFINE_FLOAT(DBX_PHI_K_B, 3.0f);
 
 /**
  * Integral control PHI
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_phi_f_i, 0.2f);
+PARAM_DEFINE_FLOAT(DBX_PHI_F_I, 0.2f);
 
 
 /**
@@ -105,130 +117,142 @@ PARAM_DEFINE_FLOAT(DBX_phi_f_i, 0.2f);
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_theta_tau, 0.7f);
+PARAM_DEFINE_FLOAT(DBX_THETA_TAU, 0.7f);
 /**
  * Ganancia control THETA
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_theta_K_b, 3.0f);
+PARAM_DEFINE_FLOAT(DBX_THETA_K_B, 3.0f);
 
 /**
  * Integral control THETA
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_theta_f_i, 0.2f);
-
+PARAM_DEFINE_FLOAT(DBX_THETA_F_I, 0.2f);
+DBX_Atti_sens
 /**
  * Tiempo de respuesta PSI
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_psi_tau, 4.0f);
+PARAM_DEFINE_FLOAT(DBX_PSI_TAU, 4.0f);
 /**
  * Ganancia control PSI
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_psi_K_b, 2.5f);
+PARAM_DEFINE_FLOAT(DBX_PSI_K_B, 2.5f);
 
 /**
  * Integral control PSI
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_psi_f_i, 0.1f);
+PARAM_DEFINE_FLOAT(DBX_PSI_F_I, 0.1f);
 
 /**
  * Tiempo respuesta control P
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_p_tau, 0.3f);
+PARAM_DEFINE_FLOAT(DBX_P_TAU, 0.3f);
 
 /**
  * Ganancia control P
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_p_K_b, 6.0f);
+PARAM_DEFINE_FLOAT(DBX_P_K_B, 6.0f);
 
 /**
  * Tiempo respuesta control Q
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_q_tau, 0.3f);
+PARAM_DEFINE_FLOAT(DBX_Q_TAU, 0.3f);
 
 /**
  * Ganancia control Q
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_q_K_b, 6.0f);
+PARAM_DEFINE_FLOAT(DBX_Q_K_B, 6.0f);
 
 /**
  * Tiempo respuesta control R
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_r_tau, 0.5f);
+PARAM_DEFINE_FLOAT(DBX_R_TAU, 0.5f);
 
 /**
  * Ganancia control R
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_r_K_b, 5.0f);
+PARAM_DEFINE_FLOAT(DBX_R_K_B, 5.0f);
 
 
 /**
@@ -236,121 +260,132 @@ PARAM_DEFINE_FLOAT(DBX_r_K_b, 5.0f);
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_Flaps_deg, 0.0f);
+PARAM_DEFINE_FLOAT(DBX_FLAPS_DEG, 0.0f);
 
 /**
  * Theta P Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_theta_Kp, 3.0f);
+PARAM_DEFINE_FLOAT(DBX_CL_THETA_KP, 3.0f);
 
 /**
  * Phi P Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_phi_Kp, 3.0f);
+PARAM_DEFINE_FLOAT(DBX_CL_PHI_KP, 3.0f);
 
 /**
  * Theta I Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_theta_Ki, 0.1f);
+PARAM_DEFINE_FLOAT(DBX_CL_THETA_KI, 0.1f);
 
 /**
  * Phi I Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_phi_Ki, 0.1f);
+PARAM_DEFINE_FLOAT(DBX_CL_PHI_KI, 0.1f);
 
 /**
  * Theta D Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_theta_Kd, 0.0f);
+PARAM_DEFINE_FLOAT(DBX_CL_THETA_KD, 0.0f);
 
 /**
  * Phi D Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_phi_Kd, 0.0f);
+PARAM_DEFINE_FLOAT(DBX_CL_PHI_KD, 0.0f);
 
 /**
  * Theta_dot P Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_theta_dot_Kp, 0.2f);
+PARAM_DEFINE_FLOAT(DBX_CL_THETA_DOT_KP, 0.2f);
 
 /**
  * Phi_dot P Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_phi_dot_Kp, 0.2f);
+PARAM_DEFINE_FLOAT(DBX_CL_PHI_DOT_KP, 0.2f);
 
 /**
  * Theta_dot I Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_theta_dot_Ki, 0.0f);
+PARAM_DEFINE_FLOAT(DBX_CL_THETA_DOT_KI, 0.0f);
 
 /**
  * Phi I Gain of PID cotnroller
  *
  * RE-CHECK this.
  *
- * @min
- * @max
- * @
+ * @unit unknown
+ * @min 0
+ * @max 100
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_phi_dot_Ki, 0.0f);
+PARAM_DEFINE_FLOAT(DBX_CL_PHI_DOT_KI, 0.0f);
 
 // * Params of PID controller*/
 
@@ -361,9 +396,9 @@ PARAM_DEFINE_FLOAT(DBXcl_phi_dot_Ki, 0.0f);
  *
  * @min
  * @max
- * @
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_theta_dot_Kd, 0.0f);
+PARAM_DEFINE_FLOAT(DBX_CL_THETA_DOT_KD, 0.0f);
 
 /**
  * Phi_dot D Gain of PID cotnroller
@@ -372,6 +407,6 @@ PARAM_DEFINE_FLOAT(DBXcl_theta_dot_Kd, 0.0f);
  *
  * @min
  * @max
- * @
+ * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBXcl_phi_dot_Kd, 0.0f);
+PARAM_DEFINE_FLOAT(DBX_CL_PHI_DOT_KD, 0.0f);
