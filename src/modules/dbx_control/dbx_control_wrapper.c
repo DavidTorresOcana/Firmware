@@ -175,45 +175,45 @@ int simulink_main(int argc, char *argv[])
 	}	GCS_comms_pointers;
 
 	// Get the pointers to GCS params
-	GCS_comms_pointers.Throtle_sens = param_find("DBX_THROTTLE_SENS");
+	GCS_comms_pointers.Throtle_sens = param_find("DBX_THRT_SENS");
 	GCS_comms_pointers.Yaw_sens = param_find("DBX_YAW_SENS");
 	GCS_comms_pointers.Atti_sens = param_find("DBX_ATTI_SENS");
 
 	GCS_comms_pointers.phi_tau = param_find("DBX_PHI_TAU");
-	GCS_comms_pointers.phi_K_b = param_find("DBX_PHI_K_B");
-	GCS_comms_pointers.phi_f_i = param_find("DBX_PHI_F_I");
+	GCS_comms_pointers.phi_K_b = param_find("DBX_PHI_KB");
+	GCS_comms_pointers.phi_f_i = param_find("DBX_PHI_FI");
 
 	GCS_comms_pointers.theta_tau = param_find("DBX_THETA_TAU");
-	GCS_comms_pointers.theta_K_b = param_find("DBX_THETA_K_B");
-	GCS_comms_pointers.theta_f_i = param_find("DBX_THETA_F_I");
+	GCS_comms_pointers.theta_K_b = param_find("DBX_THETA_KB");
+	GCS_comms_pointers.theta_f_i = param_find("DBX_THETA_FI");
 
 	GCS_comms_pointers.psi_tau = param_find("DBX_PSI_TAU");
-	GCS_comms_pointers.psi_K_b = param_find("DBX_PSI_K_B");
-	GCS_comms_pointers.psi_f_i = param_find("DBX_PSI_F_I");
+	GCS_comms_pointers.psi_K_b = param_find("DBX_PSI_KB");
+	GCS_comms_pointers.psi_f_i = param_find("DBX_PSI_FI");
 
 	GCS_comms_pointers.p_tau = param_find("DBX_P_TAU");
-	GCS_comms_pointers.p_K_b = param_find("DBX_P_K_B");
+	GCS_comms_pointers.p_K_b = param_find("DBX_P_KB");
 
 	GCS_comms_pointers.q_tau = param_find("DBX_Q_TAU");
-	GCS_comms_pointers.q_K_b = param_find("DBX_Q_K_B");
+	GCS_comms_pointers.q_K_b = param_find("DBX_Q_KB");
 
 	GCS_comms_pointers.r_tau = param_find("DBX_R_TAU");
-	GCS_comms_pointers.r_K_b = param_find("DBX_R_K_B");
+	GCS_comms_pointers.r_K_b = param_find("DBX_R_KB");
 
-	GCS_comms_pointers.Flaps_deg = param_find("DBX_FLAPS_DEG");
+	GCS_comms_pointers.Flaps_deg = param_find("DBX_FLP_DEG");
 
-	GCS_comms_pointers.PID_theta_Kp = param_find("DBX_CL_THETA_KP");
-	GCS_comms_pointers.PID_phi_Kp = param_find("DBX_CL_PHI_KP");
-	GCS_comms_pointers.PID_theta_Ki = param_find("DBX_CL_THETA_KI");
-	GCS_comms_pointers.PID_phi_Ki = param_find("DBX_CL_PHI_KI");
-	GCS_comms_pointers.PID_theta_Kd = param_find("DBX_CL_THETA_KD");
-	GCS_comms_pointers.PID_phi_Kd = param_find("DBX_CL_PHI_KD");
-	GCS_comms_pointers.PID_theta_dot_Kp = param_find("DBX_CL_THETA_DOT_KP");
-	GCS_comms_pointers.PID_phi_dot_Kp = param_find("DBX_CL_PHI_DOT_KP");
-	GCS_comms_pointers.PID_theta_dot_Ki = param_find("DBX_CL_THETA_DOT_KI");
-	GCS_comms_pointers.PID_phi_dot_Ki = param_find("DBX_CL_PHI_DOT_KI");
-	GCS_comms_pointers.PID_theta_dot_Kd = param_find("DBX_CL_THETA_DOT_KD");
-	GCS_comms_pointers.PID_phi_dot_Kd = param_find("DBX_CL_PHI_DOT_KD");
+	GCS_comms_pointers.PID_theta_Kp = param_find("DBCL_THTA_KP");
+	GCS_comms_pointers.PID_phi_Kp = param_find("DBCL_PHI_KP");
+	GCS_comms_pointers.PID_theta_Ki = param_find("DBCL_THTA_KI");
+	GCS_comms_pointers.PID_phi_Ki = param_find("DBCL_PHI_KI");
+	GCS_comms_pointers.PID_theta_Kd = param_find("DBCL_THTA_KD");
+	GCS_comms_pointers.PID_phi_Kd = param_find("DBCL_PHI_KD");
+	GCS_comms_pointers.PID_theta_dot_Kp = param_find("DBCL_THTA_D_KP");
+	GCS_comms_pointers.PID_phi_dot_Kp = param_find("DBCL_PHI_D_KP");
+	GCS_comms_pointers.PID_theta_dot_Ki = param_find("DBCL_THTA_D_KI");
+	GCS_comms_pointers.PID_phi_dot_Ki = param_find("DBCL_PHI_D_KI");
+	GCS_comms_pointers.PID_theta_dot_Kd = param_find("DBCL_THTA_D_KD");
+	GCS_comms_pointers.PID_phi_dot_Kd = param_find("DBCL_PHI_D_KD");
 
 	// Limiting the update rate
 	orb_set_interval(sensors_sub, step_size);

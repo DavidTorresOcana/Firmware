@@ -50,7 +50,7 @@
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_THROTTLE_SENS, 5.0f);
+PARAM_DEFINE_FLOAT(DBX_THRT_SENS, 5.0f);
 
 /**
  * Sensibildiad ginada en DEG
@@ -97,7 +97,7 @@ PARAM_DEFINE_FLOAT(DBX_PHI_TAU, 0.7f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_PHI_K_B, 3.0f);
+PARAM_DEFINE_FLOAT(DBX_PHI_KB, 3.0f);
 
 /**
  * Integral control PHI
@@ -109,7 +109,7 @@ PARAM_DEFINE_FLOAT(DBX_PHI_K_B, 3.0f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_PHI_F_I, 0.2f);
+PARAM_DEFINE_FLOAT(DBX_PHI_FI, 0.2f);
 
 
 /**
@@ -133,7 +133,7 @@ PARAM_DEFINE_FLOAT(DBX_THETA_TAU, 0.7f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_THETA_K_B, 3.0f);
+PARAM_DEFINE_FLOAT(DBX_THETA_KB, 3.0f);
 
 /**
  * Integral control THETA
@@ -145,7 +145,7 @@ PARAM_DEFINE_FLOAT(DBX_THETA_K_B, 3.0f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_THETA_F_I, 0.2f);
+PARAM_DEFINE_FLOAT(DBX_THETA_FI, 0.2f);
 DBX_Atti_sens
 /**
  * Tiempo de respuesta PSI
@@ -168,7 +168,7 @@ PARAM_DEFINE_FLOAT(DBX_PSI_TAU, 4.0f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_PSI_K_B, 2.5f);
+PARAM_DEFINE_FLOAT(DBX_PSI_KB, 2.5f);
 
 /**
  * Integral control PSI
@@ -180,7 +180,7 @@ PARAM_DEFINE_FLOAT(DBX_PSI_K_B, 2.5f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_PSI_F_I, 0.1f);
+PARAM_DEFINE_FLOAT(DBX_PSI_FI, 0.1f);
 
 /**
  * Tiempo respuesta control P
@@ -204,7 +204,7 @@ PARAM_DEFINE_FLOAT(DBX_P_TAU, 0.3f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_P_K_B, 6.0f);
+PARAM_DEFINE_FLOAT(DBX_P_KB, 6.0f);
 
 /**
  * Tiempo respuesta control Q
@@ -228,7 +228,7 @@ PARAM_DEFINE_FLOAT(DBX_Q_TAU, 0.3f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_Q_K_B, 6.0f);
+PARAM_DEFINE_FLOAT(DBX_Q_KB, 6.0f);
 
 /**
  * Tiempo respuesta control R
@@ -252,7 +252,7 @@ PARAM_DEFINE_FLOAT(DBX_R_TAU, 0.5f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_R_K_B, 5.0f);
+PARAM_DEFINE_FLOAT(DBX_R_KB, 5.0f);
 
 
 /**
@@ -265,7 +265,7 @@ PARAM_DEFINE_FLOAT(DBX_R_K_B, 5.0f);
  * @max 100
  * @group DBX Control
  */
-PARAM_DEFINE_FLOAT(DBX_FLAPS_DEG, 0.0f);
+PARAM_DEFINE_FLOAT(DBX_FLP_DEG, 0.0f);
 
 /**
  * Theta P Gain of PID cotnroller
@@ -277,7 +277,7 @@ PARAM_DEFINE_FLOAT(DBX_FLAPS_DEG, 0.0f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_THETA_KP, 3.0f);
+PARAM_DEFINE_FLOAT(DBCL_THTA_KP, 3.0f);
 
 /**
  * Phi P Gain of PID cotnroller
@@ -289,7 +289,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_THETA_KP, 3.0f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_PHI_KP, 3.0f);
+PARAM_DEFINE_FLOAT(DBCL_PHI_KP, 3.0f);
 
 /**
  * Theta I Gain of PID cotnroller
@@ -301,7 +301,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_PHI_KP, 3.0f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_THETA_KI, 0.1f);
+PARAM_DEFINE_FLOAT(DBCL_THTA_KI, 0.1f);
 
 /**
  * Phi I Gain of PID cotnroller
@@ -313,7 +313,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_THETA_KI, 0.1f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_PHI_KI, 0.1f);
+PARAM_DEFINE_FLOAT(DBCL_PHI_KI, 0.1f);
 
 /**
  * Theta D Gain of PID cotnroller
@@ -325,7 +325,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_PHI_KI, 0.1f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_THETA_KD, 0.0f);
+PARAM_DEFINE_FLOAT(DBCL_THTA_KD, 0.0f);
 
 /**
  * Phi D Gain of PID cotnroller
@@ -337,7 +337,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_THETA_KD, 0.0f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_PHI_KD, 0.0f);
+PARAM_DEFINE_FLOAT(DBCL_PHI_KD, 0.0f);
 
 /**
  * Theta_dot P Gain of PID cotnroller
@@ -349,7 +349,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_PHI_KD, 0.0f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_THETA_DOT_KP, 0.2f);
+PARAM_DEFINE_FLOAT(DBCL_THTA_D_KP, 0.2f);
 
 /**
  * Phi_dot P Gain of PID cotnroller
@@ -361,7 +361,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_THETA_DOT_KP, 0.2f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_PHI_DOT_KP, 0.2f);
+PARAM_DEFINE_FLOAT(DBCL_PHI_D_KP, 0.2f);
 
 /**
  * Theta_dot I Gain of PID cotnroller
@@ -373,7 +373,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_PHI_DOT_KP, 0.2f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_THETA_DOT_KI, 0.0f);
+PARAM_DEFINE_FLOAT(DBCL_THTA_D_KI, 0.0f);
 
 /**
  * Phi I Gain of PID cotnroller
@@ -385,7 +385,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_THETA_DOT_KI, 0.0f);
  * @max 100
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_PHI_DOT_KI, 0.0f);
+PARAM_DEFINE_FLOAT(DBCL_PHI_D_KI, 0.0f);
 
 // * Params of PID controller*/
 
@@ -398,7 +398,7 @@ PARAM_DEFINE_FLOAT(DBX_CL_PHI_DOT_KI, 0.0f);
  * @max
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_THETA_DOT_KD, 0.0f);
+PARAM_DEFINE_FLOAT(DBCL_THTA_D_KD, 0.0f);
 
 /**
  * Phi_dot D Gain of PID cotnroller
@@ -409,4 +409,4 @@ PARAM_DEFINE_FLOAT(DBX_CL_THETA_DOT_KD, 0.0f);
  * @max
  * @group DBX_CL Control
  */
-PARAM_DEFINE_FLOAT(DBX_CL_PHI_DOT_KD, 0.0f);
+PARAM_DEFINE_FLOAT(DBCL_PHI_D_KD, 0.0f);

@@ -2,52 +2,52 @@
 # VTOL ganancias y parametros control avanzado de DBX
 #
 
-param set DBX_Throtle_sens  7.0
-param set DBX_Yaw_sens 20.0
-param set DBX_Atti_sens 15.0
+param set DBX_THRT_SENS  7.0
+param set DBX_YAW_SENS 20.0
+param set DBX_ATTI_SENS 15.0
 
-param set DBX_phi_tau 0.15
-param set DBX_phi_K_b 3.0
-param set DBX_phi_f_i 0.5
+param set DBX_PHI_TAU 0.15
+param set DBX_PHI_KB 3.0
+param set DBX_PHI_FI 0.5
 
-param set DBX_theta_tau 0.15
-param set DBX_theta_K_b 3.0
-param set DBX_theta_f_i 0.5
+param set DBX_THETA_TAU 0.15
+param set DBX_THETA_KB 3.0
+param set DBX_THETA_FI 0.5
 
-param set DBX_psi_tau 4
-param set DBX_psi_K_b 2.5
-param set DBX_psi_f_i 0.1
+param set DBX_PSI_TAU 4
+param set DBX_PSI_KB 2.5
+param set DBX_PSI_FI 0.1
 
-param set DBX_p_tau 0.05
-param set DBX_p_K_b 5.0
+param set DBX_P_TAU 0.05
+param set DBX_P_KB 5.0
 
-param set DBX_q_tau 0.05
-param set DBX_q_K_b 5.0
+param set DBX_Q_TAU 0.05
+param set DBX_Q_KB 5.0
 
-param set DBX_r_tau 0.1
-param set DBX_r_K_b 5.0
+param set DBX_R_TAU 0.1
+param set DBX_R_KB 5.0
 
-param set DBX_Flaps_deg 0.0
+param set DBX_FLP_DEG 0.0
 
 
 # Params of Classical controller
-param set DBXcl_theta_Kp 3.0
-param set DBXcl_phi_Kp 3.0
+param set DBCL_THTA_KP 3.0
+param set DBCL_PHI_KP 3.0
 
-param set DBXcl_theta_Ki 0.1
-param set DBXcl_phi_Ki 0.1
+param set DBCL_THTA_KI 0.1
+param set DBCL_PHI_KI 0.1
 
-param set DBXcl_theta_Kd 0.0
-param set DBXcl_phi_Kd 0.0
+param set DBCL_THTA_KD 0.0
+param set DBCL_PHI_KD 0.0
 
-param set DBXcl_theta_dot_Kp 0.2
-param set DBXcl_phi_dot_Kp 0.2
+param set DBCL_THTA_D_KP 0.2
+param set DBCL_PHI_D_KP 0.2
 
-param set DBXcl_theta_dot_Ki 0.0
-param set DBXcl_phi_dot_Ki 0.0
+param set DBCL_THTA_D_KI 0.0
+param set DBCL_PHI_D_KI 0.0
 
-param set DBXcl_theta_dot_Kd 0.0
-param set DBXcl_phi_dot_Kd 0.0
+param set DBCL_THTA_D_KD 0.0
+param set DBCL_PHI_D_KD 0.0
 
 echo "Control_params"
 #exit
