@@ -54,6 +54,10 @@
 #include <drivers/drv_tone_alarm.h>
 #include <drivers/drv_hrt.h>
 
+#include <systemlib/systemlib.h>
+#include <systemlib/param/param.h>
+#include <systemlib/err.h>
+
 // Include the generated files and code of Simulink: Autopilot
 #include "dbx_control_ert_rtw/dbx_control.c"
 #include "dbx_control_ert_rtw/dbx_control_data.c" // Aqui se cargan los datos y constantes con que se compila Simulink
@@ -73,7 +77,7 @@ int pwm;
 int buzzer;
 
 static int simulink_task;
-static bool thread_exit;
+static bool thread_exit = true;
 static bool pwm_enabled;
 
 struct rgbled_rgbset_t{
@@ -193,45 +197,45 @@ int simulink_main(int argc, char *argv[])
 	}	GCS_comms_pointers;
 
 	// Get the pointers to GCS params
-	GCS_comms_pointers.Throtle_sens = param_find("DBX_Throtle_sens");
-	GCS_comms_pointers.Yaw_sens = param_find("DBX_Yaw_sens");
-	GCS_comms_pointers.Atti_sens = param_find("DBX_Atti_sens");
+	GCS_comms_pointers.Throtle_sens = param_find("DBX_THRT_SENS");
+	GCS_comms_pointers.Yaw_sens = param_find("DBX_YAW_SENS");
+	GCS_comms_pointers.Atti_sens = param_find("DBX_ATTI_SENS");
 
-	GCS_comms_pointers.phi_tau = param_find("DBX_phi_tau");
-	GCS_comms_pointers.phi_K_b = param_find("DBX_phi_K_b");
-	GCS_comms_pointers.phi_f_i = param_find("DBX_phi_f_i");
+	GCS_comms_pointers.phi_tau = param_find("DBX_PHI_TAU");
+	GCS_comms_pointers.phi_K_b = param_find("DBX_PHI_KB");
+	GCS_comms_pointers.phi_f_i = param_find("DBX_PHI_FI");
 
-	GCS_comms_pointers.theta_tau = param_find("DBX_theta_tau");
-	GCS_comms_pointers.theta_K_b = param_find("DBX_theta_K_b");
-	GCS_comms_pointers.theta_f_i = param_find("DBX_theta_f_i");
+	GCS_comms_pointers.theta_tau = param_find("DBX_THETA_TAU");
+	GCS_comms_pointers.theta_K_b = param_find("DBX_THETA_KB");
+	GCS_comms_pointers.theta_f_i = param_find("DBX_THETA_FI");
 
-	GCS_comms_pointers.psi_tau = param_find("DBX_psi_tau");
-	GCS_comms_pointers.psi_K_b = param_find("DBX_psi_K_b");
-	GCS_comms_pointers.psi_f_i = param_find("DBX_psi_f_i");
+	GCS_comms_pointers.psi_tau = param_find("DBX_PSI_TAU");
+	GCS_comms_pointers.psi_K_b = param_find("DBX_PSI_KB");
+	GCS_comms_pointers.psi_f_i = param_find("DBX_PSI_FI");
 
-	GCS_comms_pointers.p_tau = param_find("DBX_p_tau");
-	GCS_comms_pointers.p_K_b = param_find("DBX_p_K_b");
+	GCS_comms_pointers.p_tau = param_find("DBX_P_TAU");
+	GCS_comms_pointers.p_K_b = param_find("DBX_P_KB");
 
-	GCS_comms_pointers.q_tau = param_find("DBX_q_tau");
-	GCS_comms_pointers.q_K_b = param_find("DBX_q_K_b");
+	GCS_comms_pointers.q_tau = param_find("DBX_Q_TAU");
+	GCS_comms_pointers.q_K_b = param_find("DBX_Q_KB");
 
-	GCS_comms_pointers.r_tau = param_find("DBX_r_tau");
-	GCS_comms_pointers.r_K_b = param_find("DBX_r_K_b");
+	GCS_comms_pointers.r_tau = param_find("DBX_R_TAU");
+	GCS_comms_pointers.r_K_b = param_find("DBX_R_KB");
 
-	GCS_comms_pointers.Flaps_deg = param_find("DBX_Flaps_deg");
+	GCS_comms_pointers.Flaps_deg = param_find("DBX_FLP_DEG");
 
-	GCS_comms_pointers.PID_theta_Kp = param_find("DBXcl_theta_Kp");
-	GCS_comms_pointers.PID_phi_Kp = param_find("DBXcl_phi_Kp");
-	GCS_comms_pointers.PID_theta_Ki = param_find("DBXcl_theta_Ki");
-	GCS_comms_pointers.PID_phi_Ki = param_find("DBXcl_phi_Ki");
-	GCS_comms_pointers.PID_theta_Kd = param_find("DBXcl_theta_Kd");
-	GCS_comms_pointers.PID_phi_Kd = param_find("DBXcl_phi_Kd");
-	GCS_comms_pointers.PID_theta_dot_Kp = param_find("DBXcl_theta_dot_Kp");
-	GCS_comms_pointers.PID_phi_dot_Kp = param_find("DBXcl_phi_dot_Kp");
-	GCS_comms_pointers.PID_theta_dot_Ki = param_find("DBXcl_theta_dot_Ki");
-	GCS_comms_pointers.PID_phi_dot_Ki = param_find("DBXcl_phi_dot_Ki");
-	GCS_comms_pointers.PID_theta_dot_Kd = param_find("DBXcl_theta_dot_Kd");
-	GCS_comms_pointers.PID_phi_dot_Kd = param_find("DBXcl_phi_dot_Kd");
+	GCS_comms_pointers.PID_theta_Kp = param_find("DBCL_THTA_KP");
+	GCS_comms_pointers.PID_phi_Kp = param_find("DBCL_PHI_KP");
+	GCS_comms_pointers.PID_theta_Ki = param_find("DBCL_THTA_KI");
+	GCS_comms_pointers.PID_phi_Ki = param_find("DBCL_PHI_KI");
+	GCS_comms_pointers.PID_theta_Kd = param_find("DBCL_THTA_KD");
+	GCS_comms_pointers.PID_phi_Kd = param_find("DBCL_PHI_KD");
+	GCS_comms_pointers.PID_theta_dot_Kp = param_find("DBCL_THTA_D_KP");
+	GCS_comms_pointers.PID_phi_dot_Kp = param_find("DBCL_PHI_D_KP");
+	GCS_comms_pointers.PID_theta_dot_Ki = param_find("DBCL_THTA_D_KI");
+	GCS_comms_pointers.PID_phi_dot_Ki = param_find("DBCL_PHI_D_KI");
+	GCS_comms_pointers.PID_theta_dot_Kd = param_find("DBCL_THTA_D_KD");
+	GCS_comms_pointers.PID_phi_dot_Kd = param_find("DBCL_PHI_D_KD");
 
 	// Limiting the update rate
 	orb_set_interval(sensors_sub, step_size);
@@ -257,6 +261,7 @@ int simulink_main(int argc, char *argv[])
 	int test_time = 3000; // Test time ms
 	if(!dbx_test_rc(test_time)) {
 		// primary application thread
+		PX4_INFO("Starting DBX Control Thread");
 		while (!thread_exit) {
 			int poll_return = poll(fds, 1, 1000);
 			if (poll_return > 0) {
@@ -347,9 +352,9 @@ int simulink_main(int argc, char *argv[])
 						}
 
 						// Read GCS parameters
-						param_get(GCS_comms_pointers.Throtle_sens, 		&(GCS_parameters.Throtle_sens));
+						param_get(GCS_comms_pointers.Throtle_sens, 	&(GCS_parameters.Throtle_sens));
 						param_get(GCS_comms_pointers.Yaw_sens,          &(GCS_parameters.Yaw_sens));
-						param_get(GCS_comms_pointers.Atti_sens, 		&(GCS_parameters.Atti_sens));
+						param_get(GCS_comms_pointers.Atti_sens, 	&(GCS_parameters.Atti_sens));
 						param_get(GCS_comms_pointers.phi_tau,           &(GCS_parameters.phi_tau));
 						param_get(GCS_comms_pointers.phi_K_b,           &(GCS_parameters.phi_K_b));
 						param_get(GCS_comms_pointers.phi_f_i,           &(GCS_parameters.phi_f_i));
@@ -368,11 +373,11 @@ int simulink_main(int argc, char *argv[])
 						param_get(GCS_comms_pointers.Flaps_deg,         &(GCS_parameters.Flaps_deg));
 
 						param_get(GCS_comms_pointers.PID_theta_Kp,  	&(GCS_parameters.PID_theta_Kp));
-						param_get(GCS_comms_pointers.PID_phi_Kp,  		&(GCS_parameters.PID_phi_Kp));
-						param_get(GCS_comms_pointers.PID_theta_Ki, 		&(GCS_parameters.PID_theta_Ki));
-						param_get(GCS_comms_pointers.PID_phi_Ki,  		&(GCS_parameters.PID_phi_Ki));
+						param_get(GCS_comms_pointers.PID_phi_Kp,  	&(GCS_parameters.PID_phi_Kp));
+						param_get(GCS_comms_pointers.PID_theta_Ki, 	&(GCS_parameters.PID_theta_Ki));
+						param_get(GCS_comms_pointers.PID_phi_Ki,  	&(GCS_parameters.PID_phi_Ki));
 						param_get(GCS_comms_pointers.PID_theta_Kd,  	&(GCS_parameters.PID_theta_Kd));
-						param_get(GCS_comms_pointers.PID_phi_Kd,  		&(GCS_parameters.PID_phi_Kd));
+						param_get(GCS_comms_pointers.PID_phi_Kd,  	&(GCS_parameters.PID_phi_Kd));
 						param_get(GCS_comms_pointers.PID_theta_dot_Kp,  &(GCS_parameters.PID_theta_dot_Kp));
 						param_get(GCS_comms_pointers.PID_phi_dot_Kp,  	&(GCS_parameters.PID_phi_dot_Kp));
 						param_get(GCS_comms_pointers.PID_theta_dot_Ki,  &(GCS_parameters.PID_theta_dot_Ki));
@@ -381,43 +386,43 @@ int simulink_main(int argc, char *argv[])
 						param_get(GCS_comms_pointers.PID_phi_dot_Kd,  	&(GCS_parameters.PID_phi_dot_Kd));
 
 						// Declarar las ganancias de Simulink: se podria necesitar Casting!
-// // // // 						dbx_control_P.Throtle_sens      = GCS_parameters.Throtle_sens;
-// // // // 						dbx_control_P.Yaw_sens          = GCS_parameters.Yaw_sens;
-// // // // 						dbx_control_P.Roll_pich_sens    = GCS_parameters.Atti_sens;
-// // // // 						dbx_control_P.phi_tau           = GCS_parameters.phi_tau;
-// // // // 						dbx_control_P.phi_K_b           = GCS_parameters.phi_K_b;
-// // // // 						dbx_control_P.phi_f_i           = GCS_parameters.phi_f_i;
-// // // // 						dbx_control_P.theta_tau         = GCS_parameters.theta_tau;
-// // // // 						dbx_control_P.theta_K_b         = GCS_parameters.theta_K_b;
-// // // // 						dbx_control_P.theta_f_i         = GCS_parameters.theta_f_i;
-//                         dbx_control_P.psi_tau           = GCS_parameters.psi_tau; // Estas salidas estaban cuando habia control en heading
-//                         dbx_control_P.psi_K_b           = GCS_parameters.psi_K_b;  // Descomentarlas si se activa heading control en simulink
-//                         dbx_control_P.psi_f_i           = GCS_parameters.psi_f_i;
-// // // // 						dbx_control_P.p_tau             = GCS_parameters.p_tau;
-// // // // 						dbx_control_P.p_K_b             = GCS_parameters.p_K_b;
-// // // // 						dbx_control_P.q_tau             = GCS_parameters.q_tau;
-// // // // 						dbx_control_P.q_K_b             = GCS_parameters.q_K_b;
-// // // // 						dbx_control_P.r_tau             = GCS_parameters.r_tau;
-// // // // 						dbx_control_P.r_K_b             = GCS_parameters.r_K_b;
-// // // // 						dbx_control_P.Flaps_ang_deg  	= GCS_parameters.Flaps_deg;
-// // // // 
-// // // // 						dbx_control_P.PID_theta_Kp  	= GCS_parameters.PID_theta_Kp;
-// // // // 						dbx_control_P.PID_phi_Kp  		= GCS_parameters.PID_phi_Kp;
-// // // // 
-// // // // 						dbx_control_P.PID_theta_Ki  	= GCS_parameters.PID_theta_Ki;
-// // // // 						dbx_control_P.PID_phi_Ki  		= GCS_parameters.PID_phi_Ki;
-// // // // 
-// // // // 						dbx_control_P.PID_theta_Kd  	= GCS_parameters.PID_theta_Kd;
-// // // // 						dbx_control_P.PID_phi_Kd  		= GCS_parameters.PID_phi_Kd;
-// // // // 
-// // // // 						dbx_control_P.PID_theta_dot_Kp  = GCS_parameters.PID_theta_dot_Kp;
-// // // // 						dbx_control_P.PID_phi_dot_Kp  	= GCS_parameters.PID_phi_dot_Kp;
-// // // // 
-// // // // 						dbx_control_P.PID_theta_dot_Ki  = GCS_parameters.PID_theta_dot_Ki;
-// // // // 						dbx_control_P.PID_phi_dot_Ki  	= GCS_parameters.PID_phi_dot_Ki;
-// // // // 
-// // // // 						dbx_control_P.PID_theta_dot_Kd  = GCS_parameters.PID_theta_dot_Kd;
-// // // // 						dbx_control_P.PID_phi_dot_Kd  	= GCS_parameters.PID_phi_dot_Kd;
+						dbx_control_P.Throtle_sens 	= GCS_parameters.Throtle_sens;
+						dbx_control_P.Yaw_sens  	= GCS_parameters.Yaw_sens;
+						dbx_control_P.Roll_pich_sens	= GCS_parameters.Atti_sens;
+						dbx_control_P.phi_tau  		= GCS_parameters.phi_tau;
+						dbx_control_P.phi_K_b  		= GCS_parameters.phi_K_b;
+						dbx_control_P.phi_f_i  		= GCS_parameters.phi_f_i;
+						dbx_control_P.theta_tau  	= GCS_parameters.theta_tau;
+						dbx_control_P.theta_K_b  	= GCS_parameters.theta_K_b;
+						dbx_control_P.theta_f_i  	= GCS_parameters.theta_f_i;
+						//             dbx_control_P.psi_tau  = GCS_parameters.psi_tau; // Estas salidas estaban cuando habia control en heading
+						//             dbx_control_P.psi_K_b  = GCS_parameters.psi_K_b;  // Descomentarlas si se activa heading control en simulink
+						//             dbx_control_P.psi_f_i  = GCS_parameters.psi_f_i;
+						dbx_control_P.p_tau  = GCS_parameters.p_tau;
+						dbx_control_P.p_K_b  = GCS_parameters.p_K_b;
+						dbx_control_P.q_tau  = GCS_parameters.q_tau;
+						dbx_control_P.q_K_b  = GCS_parameters.q_K_b;
+						dbx_control_P.r_tau  = GCS_parameters.r_tau;
+						dbx_control_P.r_K_b  = GCS_parameters.r_K_b;
+						dbx_control_P.Flaps_ang_deg  	= GCS_parameters.Flaps_deg;
+
+						dbx_control_P.PID_theta_Kp  	= GCS_parameters.PID_theta_Kp;
+						dbx_control_P.PID_phi_Kp  	= GCS_parameters.PID_phi_Kp;
+
+						dbx_control_P.PID_theta_Ki  	= GCS_parameters.PID_theta_Ki;
+						dbx_control_P.PID_phi_Ki  	= GCS_parameters.PID_phi_Ki;
+
+						dbx_control_P.PID_theta_Kd  	= GCS_parameters.PID_theta_Kd;
+						dbx_control_P.PID_phi_Kd  	= GCS_parameters.PID_phi_Kd;
+
+						dbx_control_P.PID_theta_dot_Kp  = GCS_parameters.PID_theta_dot_Kp;
+						dbx_control_P.PID_phi_dot_Kp  	= GCS_parameters.PID_phi_dot_Kp;
+
+						dbx_control_P.PID_theta_dot_Ki  = GCS_parameters.PID_theta_dot_Ki;
+						dbx_control_P.PID_phi_dot_Ki  	= GCS_parameters.PID_phi_dot_Ki;
+
+						dbx_control_P.PID_theta_dot_Kd  = GCS_parameters.PID_theta_dot_Kd;
+						dbx_control_P.PID_phi_dot_Kd  	= GCS_parameters.PID_phi_dot_Kd;
 
 						// output FMU LED signals
 						if (dbx_control_Y.led_blue == 1) {
@@ -559,6 +564,13 @@ int simulink_main(int argc, char *argv[])
 int dbx_control_main(int argc, char *argv[])
 {	// start primary application thread
 	if (!strcmp(argv[1], "start")) {
+
+		if (!thread_exit) {
+			warnx("already running");
+			/* this is not an error */
+			return 0;
+		}
+
 		thread_exit = false;
 		simulink_task = px4_task_spawn_cmd("dbx_control",
 		SCHED_DEFAULT,
@@ -689,7 +701,7 @@ int dbx_test_rc(int duration)
 		ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 		return 1;
 	}
-	ioctl(buzzer, TONE_SET_ALARM, TONE_STARTUP_TUNE);
 	PX4_INFO("RC IN CONTINUITY TEST PASSED SUCCESSFULLY!");
+	ioctl(buzzer, TONE_SET_ALARM, TONE_STARTUP_TUNE);
 	return 0;
 }
