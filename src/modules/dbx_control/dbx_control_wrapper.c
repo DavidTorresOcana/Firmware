@@ -55,7 +55,7 @@ int pwm;
 int buzzer;
 
 static int simulink_task;
-static bool thread_exit;
+static bool thread_exit = true;
 static bool pwm_enabled;
 
 struct rgbled_rgbset_t{
@@ -239,6 +239,7 @@ int simulink_main(int argc, char *argv[])
 	int test_time = 3000; // Test time ms
 	if(!dbx_test_rc(test_time)) {
 		// primary application thread
+		PX4_INFO("Starting DBX Control Thread");
 		while (!thread_exit) {
 			int poll_return = poll(fds, 1, 1000);
 			if (poll_return > 0) {
@@ -541,6 +542,13 @@ int simulink_main(int argc, char *argv[])
 int dbx_control_main(int argc, char *argv[])
 {	// start primary application thread
 	if (!strcmp(argv[1], "start")) {
+
+		if (!thread_exit) {
+			warnx("already running");
+			/* this is not an error */
+			return 0;
+		}
+
 		thread_exit = false;
 		simulink_task = px4_task_spawn_cmd("dbx_control",
 		SCHED_DEFAULT,
@@ -671,7 +679,7 @@ int dbx_test_rc(int duration)
 		ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 		return 1;
 	}
-	ioctl(buzzer, TONE_SET_ALARM, TONE_STARTUP_TUNE);
 	PX4_INFO("RC IN CONTINUITY TEST PASSED SUCCESSFULLY!");
+	ioctl(buzzer, TONE_SET_ALARM, TONE_STARTUP_TUNE);
 	return 0;
 }
