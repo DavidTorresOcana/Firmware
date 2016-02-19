@@ -3,6 +3,7 @@
  * @file dbx_control_main.c
  * Control wrapper for DBX
  *
+ * @autho Juan Herrero <juan.herrero@dbxdrones.com>
  * @author David Torres <david.torres@dbxdrones.com>
  *
  */
@@ -18,11 +19,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <errno.h>
-#include <math.h>
-#include <poll.h>
-#include <arch/board/board.h>
-#include <uORB/uORB.h>
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+#include "commander/commander_helper.h"
 
 #include <systemlib/param/param.h>
 #include <systemlib/err.h>
@@ -330,12 +329,13 @@ int simulink_main(int argc, char *argv[])
 					if (i < 10) { // 10Hz loop
 						i = i++;
 					} else {
+						// PX4_INFO("Starting 10Hz Loop");
 						// check arm state
 						if (dbx_control_Y.pwm_arm == 1 && pwm_enabled == 0 && pwm_inputs.channel_count == 8) {
 							// arm system
 							pwm_enabled = 1;
 							ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_WARNING_TUNE);
-							printf("\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\n");
+							PX4_INFO("\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\n");
 						} else if (dbx_control_Y.pwm_arm == 0 && pwm_enabled == 1) {
 							// disarm system
 							ioctl(pwm, PWM_SERVO_SET(0), 900);
@@ -348,13 +348,13 @@ int simulink_main(int argc, char *argv[])
 							ioctl(pwm, PWM_SERVO_SET(7), 1500);
 							pwm_enabled = 0;
 							ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
-							printf("\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\n");
+							PX4_INFO("\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\n");
 						}
 
 						// Read GCS parameters
-						param_get(GCS_comms_pointers.Throtle_sens, 	&(GCS_parameters.Throtle_sens));
+						param_get(GCS_comms_pointers.Throtle_sens, 		&(GCS_parameters.Throtle_sens));
 						param_get(GCS_comms_pointers.Yaw_sens,          &(GCS_parameters.Yaw_sens));
-						param_get(GCS_comms_pointers.Atti_sens, 	&(GCS_parameters.Atti_sens));
+						param_get(GCS_comms_pointers.Atti_sens, 		&(GCS_parameters.Atti_sens));
 						param_get(GCS_comms_pointers.phi_tau,           &(GCS_parameters.phi_tau));
 						param_get(GCS_comms_pointers.phi_K_b,           &(GCS_parameters.phi_K_b));
 						param_get(GCS_comms_pointers.phi_f_i,           &(GCS_parameters.phi_f_i));
@@ -373,11 +373,11 @@ int simulink_main(int argc, char *argv[])
 						param_get(GCS_comms_pointers.Flaps_deg,         &(GCS_parameters.Flaps_deg));
 
 						param_get(GCS_comms_pointers.PID_theta_Kp,  	&(GCS_parameters.PID_theta_Kp));
-						param_get(GCS_comms_pointers.PID_phi_Kp,  	&(GCS_parameters.PID_phi_Kp));
-						param_get(GCS_comms_pointers.PID_theta_Ki, 	&(GCS_parameters.PID_theta_Ki));
-						param_get(GCS_comms_pointers.PID_phi_Ki,  	&(GCS_parameters.PID_phi_Ki));
+						param_get(GCS_comms_pointers.PID_phi_Kp,  		&(GCS_parameters.PID_phi_Kp));
+						param_get(GCS_comms_pointers.PID_theta_Ki, 		&(GCS_parameters.PID_theta_Ki));
+						param_get(GCS_comms_pointers.PID_phi_Ki,  		&(GCS_parameters.PID_phi_Ki));
 						param_get(GCS_comms_pointers.PID_theta_Kd,  	&(GCS_parameters.PID_theta_Kd));
-						param_get(GCS_comms_pointers.PID_phi_Kd,  	&(GCS_parameters.PID_phi_Kd));
+						param_get(GCS_comms_pointers.PID_phi_Kd,  		&(GCS_parameters.PID_phi_Kd));
 						param_get(GCS_comms_pointers.PID_theta_dot_Kp,  &(GCS_parameters.PID_theta_dot_Kp));
 						param_get(GCS_comms_pointers.PID_phi_dot_Kp,  	&(GCS_parameters.PID_phi_dot_Kp));
 						param_get(GCS_comms_pointers.PID_theta_dot_Ki,  &(GCS_parameters.PID_theta_dot_Ki));
@@ -443,17 +443,17 @@ int simulink_main(int argc, char *argv[])
 						ioctl(rgbled, RGBLED_SET_RGB, (unsigned long)&rgb_value);
 
 						// //print debug data
-						printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%f\n",
-						(double)(dbx_control_U.runtime/1000000),
-						(double)dbx_control_Y.debug1,
-						(double)dbx_control_Y.debug2,
-						(double)dbx_control_Y.debug3,
-						(double)dbx_control_Y.debug4,
-						(double)dbx_control_Y.debug5,
-						(double)dbx_control_Y.debug6,
-						(double)dbx_control_Y.debug7,
-						(double)dbx_control_Y.debug8,
-						(double)dbx_control_P.PID_theta_Kp);
+						// printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%i\n",
+						// (double)(dbx_control_U.runtime/1000000),
+						// (double)dbx_control_Y.debug1,
+						// (double)dbx_control_Y.debug2,
+						// (double)dbx_control_Y.debug3,
+						// (double)dbx_control_Y.debug4,
+						// (double)dbx_control_Y.debug5,
+						// (double)dbx_control_Y.debug6,
+						// (double)dbx_control_Y.debug7,
+						// (double)dbx_control_Y.debug8,
+						// pwm_inputs.channel_count);
 
 						// Print Simulink outputs
 						/* printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
@@ -501,7 +501,7 @@ int simulink_main(int argc, char *argv[])
 						(double)attitude.yaw); */
 						i = 1;
 					}
-                    
+
 					// MATLAB INPUT FAILSAFE
 					if (pwm_inputs.channel_count != 8) {
 						dbx_control_U.ch1 = 1500;
@@ -523,19 +523,19 @@ int simulink_main(int argc, char *argv[])
 						ioctl(pwm, PWM_SERVO_SET(5), dbx_control_Y.pwm6);
 						ioctl(pwm, PWM_SERVO_SET(6), dbx_control_Y.pwm7);
 						ioctl(pwm, PWM_SERVO_SET(7), dbx_control_Y.pwm8);
-                        
-//                         printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
-// 						(int)(dbx_control_U.runtime/1000000),
-// 						(int)dbx_control_Y.pwm1,
-// 						(int)dbx_control_Y.pwm2,
-// 						(int)dbx_control_Y.pwm3,
-// 						(int)dbx_control_Y.pwm4,
-// 						(int)dbx_control_Y.pwm5,
-// 						(int)dbx_control_Y.pwm6,
-// 						(int)dbx_control_Y.pwm7,
-// 						(int)dbx_control_Y.pwm8,
-// 						pwm_inputs.channel_count);
-                        
+
+		               			/*PX4_INFO("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
+							(int)(dbx_control_U.runtime/1000000),
+							(int)dbx_control_Y.pwm1,
+							(int)dbx_control_Y.pwm2,
+							(int)dbx_control_Y.pwm3,
+							(int)dbx_control_Y.pwm4,
+							(int)dbx_control_Y.pwm5,
+							(int)dbx_control_Y.pwm6,
+							(int)dbx_control_Y.pwm7,
+							(int)dbx_control_Y.pwm8,
+							pwm_inputs.channel_count);*/
+
 					} else { // Disarmed or failsafe
 						failsafe_pwm_output(pwm);
 					}
@@ -606,7 +606,7 @@ int failsafe_pwm_output(int pwm) {
 
 int dbx_test_rc(int duration)
 {	int _rc_sub = orb_subscribe(ORB_ID(input_rc));
-		
+
 	//int buzzer = open(h_buzzer, 0);
 	/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
 	struct rc_input_values	rc_input;
@@ -646,14 +646,14 @@ int dbx_test_rc(int duration)
 		uint64_t rc_start_time = hrt_absolute_time();
 		while (hrt_absolute_time() - rc_start_time < (uint64_t)(duration * 1000)) {
 			PX4_INFO("I heard: [%" PRIu64 "\t%" PRIu64 "]]", (hrt_absolute_time() - rc_start_time), (uint64_t)(duration * 1000));
-			
+
 			int ret = poll(rc_fds, 1, 200);
 			PX4_INFO("Poll finished with result %i", ret);
 			if (ret > 0) {
 				if (rc_fds[0].revents & POLLIN) {
 					orb_copy(ORB_ID(input_rc), _rc_sub, &rc_input);
 					PX4_INFO("Input RC read %i", (int)rc_input.values[1]);
-                    
+
 					// Out-of-bounds check
 					for (unsigned i = 0; i < rc_input.channel_count; i++) {
 						if (abs(rc_input.values[i] - rc_last.values[i]) > 20) {
@@ -679,7 +679,7 @@ int dbx_test_rc(int duration)
 						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 						return 1;
 					}
-                    
+
                     // Normal start Radio inputs check
 					if ( abs(rc_input.values[2] - 1000)>200 && abs(rc_input.values[4] - 1000)>200 && abs(rc_input.values[5] - 1000)>200) {
 						PX4_ERR(" Radio inputs are not safe for starting");
@@ -687,7 +687,7 @@ int dbx_test_rc(int duration)
 						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
 						return 1;
 					}
-                    
+
 				} else {
 					/* key pressed, bye bye */
 					return 1;
