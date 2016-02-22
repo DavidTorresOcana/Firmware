@@ -7,22 +7,22 @@
  * @author David Torres <david.torres@dbxdrones.com>
  *
  */
+ // PX4 definitions
 #include <px4_config.h>
 #include <px4_defines.h>
 #include <px4_tasks.h>
 #include <px4_posix.h>
 #include <nuttx/config.h>
+
+// Standard libs
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
-#include "commander/commander_helper.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#define __STDC_FORMAT_MACROS
-#include <inttypes.h>
-#include "commander/commander_helper.h"
 
+// Additional libs
 #include <systemlib/param/param.h>
 #include <systemlib/err.h>
 #include <systemlib/perf_counter.h>
@@ -30,6 +30,7 @@
 #include <lib/mathlib/mathlib.h>
 #include <lib/geo/geo.h>
 
+// uORB topics
 #include <uORB/topics/vehicle_attitude_setpoint.h>
 #include <uORB/topics/manual_control_setpoint.h>
 #include <uORB/topics/actuator_controls.h>
@@ -46,16 +47,13 @@
 #include <uORB/topics/airspeed.h>
 #include <uORB/topics/vehicle_local_position.h>
 
+// Driver implementations
 #include <drivers/drv_led.h>
 #include <drivers/drv_rgbled.h>
 #include <drivers/drv_pwm_output.h>
 #include <drivers/drv_rc_input.h>
 #include <drivers/drv_tone_alarm.h>
 #include <drivers/drv_hrt.h>
-
-#include <systemlib/systemlib.h>
-#include <systemlib/param/param.h>
-#include <systemlib/err.h>
 
 // Include the generated files and code of Simulink: Autopilot
 #include "dbx_control_ert_rtw/dbx_control.c"
@@ -64,7 +62,22 @@
 
 __EXPORT int dbx_control_main(int argc, char *argv[]);
 __EXPORT int simulink_main(int argc, char *argv[]);
-__EXPORT int dbx_test_rc(int duration);
+
+int dbx_test_rc(int duration);
+int failsafe_pwm_output(int pwm);
+
+// RGB and LED state definitions
+void rgb_buzzer_rc_test(void);
+void rgb_buzzer_rc_test_fail(void);
+void rgb_buzzer_rc_test_success(void);
+void rgb_buzzer_disarmed(bool use_buzzer);
+void rgb_buzzer_armed(bool use_buzzer);
+void buzzer_init(void);
+void rgb_init(void);
+void buzzer_deinit(void);
+void rgb_deinit(void);
+
+
 
 const char *dev_rgbled = RGBLED0_DEVICE_PATH;
 const char *dev_pwm = PWM_OUTPUT0_DEVICE_PATH;
@@ -242,14 +255,13 @@ int simulink_main(int argc, char *argv[])
 	orb_set_interval(airspeed_sub, step_size);
 
 	// initialize output devices
-	rgbled = open(dev_rgbled, 0);
+	buzzer_init();
+	rgb_init();
 	pwm = open(dev_pwm, 0);
-	buzzer = open(h_buzzer, 0);
 	// Declare here the other AUX PWM outputs???
 
 	// initialize outputs
-	ioctl(rgbled, RGBLED_SET_MODE, (unsigned long)RGBLED_MODE_ON);
-	ioctl(pwm, PWM_SERVO_SET_ARM_OK, 0);
+	ioctl(rgbled, RGBLED_SET_MODE, (unsigned long)RGBLED_MODE_OFF);	ioctl(pwm, PWM_SERVO_SET_ARM_OK, 0);
 	ioctl(pwm, PWM_SERVO_ARM, 0);
 	pwm_enabled = 0;
 
@@ -334,7 +346,7 @@ int simulink_main(int argc, char *argv[])
 						if (dbx_control_Y.pwm_arm == 1 && pwm_enabled == 0 && pwm_inputs.channel_count == 8) {
 							// arm system
 							pwm_enabled = 1;
-							ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_WARNING_TUNE);
+							rgb_buzzer_armed(true);
 							PX4_INFO("\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\n");
 						} else if (dbx_control_Y.pwm_arm == 0 && pwm_enabled == 1) {
 							// disarm system
@@ -347,14 +359,14 @@ int simulink_main(int argc, char *argv[])
 							ioctl(pwm, PWM_SERVO_SET(6), 1600);
 							ioctl(pwm, PWM_SERVO_SET(7), 1500);
 							pwm_enabled = 0;
-							ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
+							rgb_buzzer_disarmed(true);
 							PX4_INFO("\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\n");
 						}
 
 						// Read GCS parameters
-						param_get(GCS_comms_pointers.Throtle_sens, 		&(GCS_parameters.Throtle_sens));
+						param_get(GCS_comms_pointers.Throtle_sens, 	&(GCS_parameters.Throtle_sens));
 						param_get(GCS_comms_pointers.Yaw_sens,          &(GCS_parameters.Yaw_sens));
-						param_get(GCS_comms_pointers.Atti_sens, 		&(GCS_parameters.Atti_sens));
+						param_get(GCS_comms_pointers.Atti_sens, 	&(GCS_parameters.Atti_sens));
 						param_get(GCS_comms_pointers.phi_tau,           &(GCS_parameters.phi_tau));
 						param_get(GCS_comms_pointers.phi_K_b,           &(GCS_parameters.phi_K_b));
 						param_get(GCS_comms_pointers.phi_f_i,           &(GCS_parameters.phi_f_i));
@@ -373,11 +385,11 @@ int simulink_main(int argc, char *argv[])
 						param_get(GCS_comms_pointers.Flaps_deg,         &(GCS_parameters.Flaps_deg));
 
 						param_get(GCS_comms_pointers.PID_theta_Kp,  	&(GCS_parameters.PID_theta_Kp));
-						param_get(GCS_comms_pointers.PID_phi_Kp,  		&(GCS_parameters.PID_phi_Kp));
-						param_get(GCS_comms_pointers.PID_theta_Ki, 		&(GCS_parameters.PID_theta_Ki));
-						param_get(GCS_comms_pointers.PID_phi_Ki,  		&(GCS_parameters.PID_phi_Ki));
+						param_get(GCS_comms_pointers.PID_phi_Kp,  	&(GCS_parameters.PID_phi_Kp));
+						param_get(GCS_comms_pointers.PID_theta_Ki, 	&(GCS_parameters.PID_theta_Ki));
+						param_get(GCS_comms_pointers.PID_phi_Ki,  	&(GCS_parameters.PID_phi_Ki));
 						param_get(GCS_comms_pointers.PID_theta_Kd,  	&(GCS_parameters.PID_theta_Kd));
-						param_get(GCS_comms_pointers.PID_phi_Kd,  		&(GCS_parameters.PID_phi_Kd));
+						param_get(GCS_comms_pointers.PID_phi_Kd,  	&(GCS_parameters.PID_phi_Kd));
 						param_get(GCS_comms_pointers.PID_theta_dot_Kp,  &(GCS_parameters.PID_theta_dot_Kp));
 						param_get(GCS_comms_pointers.PID_phi_dot_Kp,  	&(GCS_parameters.PID_phi_dot_Kp));
 						param_get(GCS_comms_pointers.PID_theta_dot_Ki,  &(GCS_parameters.PID_theta_dot_Ki));
@@ -435,12 +447,13 @@ int simulink_main(int argc, char *argv[])
 						} else {
 							led_off(LED_RED);
 						}
+						//TODO: Uncomment when simulink is finished.
 						// output RGBLED signals
-						rgbled_rgbset_t rgb_value;
-						rgb_value.red = dbx_control_Y.rgb_red;
-						rgb_value.green = dbx_control_Y.rgb_green;
-						rgb_value.blue = dbx_control_Y.rgb_blue;
-						ioctl(rgbled, RGBLED_SET_RGB, (unsigned long)&rgb_value);
+						//rgbled_rgbset_t rgb_value;
+						//rgb_value.red = dbx_control_Y.rgb_red;
+						//rgb_value.green = dbx_control_Y.rgb_green;
+						//rgb_value.blue = dbx_control_Y.rgb_blue;
+						//ioctl(rgbled, RGBLED_SET_RGB, (unsigned long)&rgb_value);
 
 						// //print debug data
 						// printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%i\n",
@@ -548,10 +561,11 @@ int simulink_main(int argc, char *argv[])
 	// disable pwm outputs
 	failsafe_pwm_output(pwm);
 	ioctl(pwm, PWM_SERVO_DISARM, 0);
-	// disable LEDs
+	// disable LEDs and buzzer
 	led_off(LED_BLUE);
 	led_off(LED_RED);
-	ioctl(rgbled, RGBLED_SET_MODE, (unsigned long)RGBLED_MODE_OFF);
+	rgb_deinit();
+	buzzer_deinit();
 	// close sensor subscriptions
 	close(sensors_sub);
 	close(attitude_sub);
@@ -605,9 +619,10 @@ int failsafe_pwm_output(int pwm) {
 
 
 int dbx_test_rc(int duration)
-{	int _rc_sub = orb_subscribe(ORB_ID(input_rc));
-
-	//int buzzer = open(h_buzzer, 0);
+{	
+	rgb_buzzer_rc_test();
+	int _rc_sub = orb_subscribe(ORB_ID(input_rc));
+	
 	/* read low-level values from FMU or IO RC inputs (PPM, Spektrum, S.Bus) */
 	struct rc_input_values	rc_input;
 	struct rc_input_values	rc_last;
@@ -619,7 +634,6 @@ int dbx_test_rc(int duration)
 	bool rc_updated;
 	orb_check(_rc_sub, &rc_updated);
 
-	PX4_INFO("Reading PPM values - press any key to abort");
 	PX4_INFO("This test guarantees: 10 Hz update rates, no glitches (channel values), no channel count changes.");
 
 	if (rc_updated) {
@@ -636,12 +650,6 @@ int dbx_test_rc(int duration)
 			.fd = _rc_sub,
 			.events = POLLIN },
 		};
-		/* poll descriptor */
-		//struct pollfd fds[2];
-		//fds[0].fd = _rc_sub;
-		//fds[0].events = POLLIN;
-		//fds[1].fd = 0;
-		//fds[1].events = POLLIN;
 
 		uint64_t rc_start_time = hrt_absolute_time();
 		while (hrt_absolute_time() - rc_start_time < (uint64_t)(duration * 1000)) {
@@ -659,7 +667,7 @@ int dbx_test_rc(int duration)
 						if (abs(rc_input.values[i] - rc_last.values[i]) > 20) {
 							PX4_ERR("comparison fail: RC: %d, expected: %d", rc_input.values[i], rc_last.values[i]);
 							(void)close(_rc_sub);
-							ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
+							rgb_buzzer_rc_test_fail();
 							return 1;
 						}
 
@@ -669,14 +677,14 @@ int dbx_test_rc(int duration)
 					if (rc_last.channel_count != rc_input.channel_count) {
 						PX4_ERR("channel count mismatch: last: %d, now: %d", rc_last.channel_count, rc_input.channel_count);
 						(void)close(_rc_sub);
-						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
+						rgb_buzzer_rc_test_fail();
 						return 1;
 					}
                     // Frequency check
 					if (hrt_absolute_time() - rc_input.timestamp_last_signal > 100000) {
 						PX4_ERR("TIMEOUT, less than 10 Hz updates");
 						(void)close(_rc_sub);
-						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
+						rgb_buzzer_rc_test_fail();
 						return 1;
 					}
 
@@ -684,12 +692,14 @@ int dbx_test_rc(int duration)
 					if ( abs(rc_input.values[2] - 1000)>200 && abs(rc_input.values[4] - 1000)>200 && abs(rc_input.values[5] - 1000)>200) {
 						PX4_ERR(" Radio inputs are not safe for starting");
 						(void)close(_rc_sub);
-						ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
+						rgb_buzzer_rc_test_fail();
 						return 1;
 					}
 
 				} else {
-					/* key pressed, bye bye */
+					/* Unexpected error */
+					PX4_ERR("Unexpected error");
+					rgb_buzzer_rc_test_fail();
 					return 1;
 				}
 			}
@@ -698,10 +708,74 @@ int dbx_test_rc(int duration)
 	} else {
 		PX4_ERR("failed reading RC input data");
 		(void)close(_rc_sub);
-		ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
+		rgb_buzzer_rc_test_fail();
 		return 1;
 	}
 	PX4_INFO("RC IN CONTINUITY TEST PASSED SUCCESSFULLY!");
-	ioctl(buzzer, TONE_SET_ALARM, TONE_STARTUP_TUNE);
+	rgb_buzzer_rc_test_success();
 	return 0;
 }
+
+// RGB and LED state definitions
+void rgb_buzzer_rc_test(void) 
+{
+	ioctl(rgbled, RGBLED_SET_COLOR, (unsigned long)RGBLED_COLOR_BLUE);
+	ioctl(rgbled, RGBLED_SET_MODE, (unsigned long)RGBLED_MODE_BLINK_FAST);
+	ioctl(buzzer, TONE_SET_ALARM, TONE_NOTIFY_NEUTRAL_TUNE);
+	return;
+}
+
+void rgb_buzzer_rc_test_fail(void) 
+{
+	ioctl(rgbled, RGBLED_SET_COLOR, (unsigned long)RGBLED_COLOR_BLUE);
+	ioctl(rgbled, RGBLED_SET_MODE, (unsigned long)RGBLED_MODE_ON);
+	ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
+	return;
+}
+
+void rgb_buzzer_rc_test_success(void) 
+{
+	rgb_buzzer_disarmed(false);
+	ioctl(buzzer, TONE_SET_ALARM, TONE_NOTIFY_POSITIVE_TUNE);
+	return;
+}
+
+void rgb_buzzer_disarmed(bool use_buzzer)
+{
+	ioctl(rgbled, RGBLED_SET_COLOR, (unsigned long)RGBLED_COLOR_GREEN);
+	ioctl(rgbled, RGBLED_SET_MODE, (unsigned long)RGBLED_MODE_BREATHE);
+	if(use_buzzer)
+		ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_FAILURE_TUNE);
+	return;
+}
+
+void rgb_buzzer_armed(bool use_buzzer)
+{
+	ioctl(rgbled, RGBLED_SET_COLOR, (unsigned long)RGBLED_COLOR_RED);
+	ioctl(rgbled, RGBLED_SET_MODE, (unsigned long)RGBLED_MODE_ON);
+	if(use_buzzer)
+		ioctl(buzzer, TONE_SET_ALARM, TONE_ARMING_WARNING_TUNE);
+	return;
+}
+
+void buzzer_init(void)
+{
+	buzzer = open(h_buzzer, 0);
+}
+
+void rgb_init(void)
+{
+	rgbled = open(dev_rgbled, 0);
+}
+
+void buzzer_deinit(void)
+{
+	
+}
+
+void rgb_deinit(void)
+{
+	ioctl(rgbled, RGBLED_SET_MODE, (unsigned long)RGBLED_MODE_OFF);
+}
+
+

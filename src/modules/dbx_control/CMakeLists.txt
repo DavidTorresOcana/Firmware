@@ -2,7 +2,7 @@
 px4_add_module(
 	MODULE modules__dbx_control
 	MAIN dbx_control
-	STACK 1200
+	STACK 2048
 	COMPILE_FLAGS
 		-Os
         
