@@ -711,9 +711,8 @@ int dbx_test_rc(int duration)
 						rgb_buzzer_rc_test_fail();
 						return 1;
 					}
-
-                    // Normal start Radio inputs check
-					if ( abs(rc_input.values[2] - 1000)>200 && abs(rc_input.values[4] - 1000)>200 && abs(rc_input.values[5] - 1000)>200) {
+                    // Normal start Radio inputs sanity check (Throttle channel 3 && Control arm switches < 1200ms)
+					if ( abs(rc_input.values[2] - 1000)>200 || abs(rc_input.values[4] - 1000)>200 || abs(rc_input.values[5] - 1000)>200) {
 						PX4_ERR(" Radio inputs are not safe for starting");
 						(void)close(_rc_sub);
 						rgb_buzzer_rc_test_fail();
