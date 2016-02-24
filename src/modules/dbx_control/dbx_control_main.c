@@ -135,6 +135,10 @@ struct {
 	float PID_phi_dot_Ki;
 	float PID_theta_dot_Kd;
 	float PID_phi_dot_Kd;
+	float PID_yaw_dot_FF;
+	float PID_yaw_dot_Kp;
+	float PID_yaw_dot_Ki;
+	float PID_yaw_dot_Kd;
 }		GCS_parameters;
 
 int simulink_main(int argc, char *argv[])
@@ -205,6 +209,10 @@ int simulink_main(int argc, char *argv[])
 		param_t PID_phi_dot_Ki;
 		param_t PID_theta_dot_Kd;
 		param_t PID_phi_dot_Kd;
+		param_t PID_yaw_dot_Kp;
+		param_t PID_yaw_dot_Ki;
+		param_t PID_yaw_dot_Kd;
+		param_t PID_yaw_dot_FF;
 
 	}	GCS_comms_pointers;
 
@@ -248,6 +256,12 @@ int simulink_main(int argc, char *argv[])
 	GCS_comms_pointers.PID_phi_dot_Ki = param_find("DBCL_PHI_D_KI");
 	GCS_comms_pointers.PID_theta_dot_Kd = param_find("DBCL_THTA_D_KD");
 	GCS_comms_pointers.PID_phi_dot_Kd = param_find("DBCL_PHI_D_KD");
+	
+	GCS_comms_pointers.PID_yaw_dot_Kp = param_find("DBCL_YAW_KP");
+	GCS_comms_pointers.PID_yaw_dot_Ki = param_find("DBCL_YAW_KI");
+	GCS_comms_pointers.PID_yaw_dot_Kd = param_find("DBCL_YAW_KD");
+	GCS_comms_pointers.PID_yaw_dot_FF = param_find("DBCL_YAW_FF");
+	
 
 	// Limiting the update rate
 	orb_set_interval(sensors_sub, step_size);
@@ -396,6 +410,10 @@ int simulink_main(int argc, char *argv[])
 						param_get(GCS_comms_pointers.PID_phi_dot_Ki,  	&(GCS_parameters.PID_phi_dot_Ki));
 						param_get(GCS_comms_pointers.PID_theta_dot_Kd,  &(GCS_parameters.PID_theta_dot_Kd));
 						param_get(GCS_comms_pointers.PID_phi_dot_Kd,  	&(GCS_parameters.PID_phi_dot_Kd));
+						param_get(GCS_comms_pointers.PID_yaw_dot_FF,  	&(GCS_parameters.PID_yaw_dot_FF));
+						param_get(GCS_comms_pointers.PID_yaw_dot_Kp,  	&(GCS_parameters.PID_yaw_dot_Kp));
+						param_get(GCS_comms_pointers.PID_yaw_dot_Ki,  	&(GCS_parameters.PID_yaw_dot_Ki));
+						param_get(GCS_comms_pointers.PID_yaw_dot_Kd,  	&(GCS_parameters.PID_yaw_dot_Kd));
 
 						// Declarar las ganancias de Simulink: se podria necesitar Casting!
 						dbx_control_P.Throtle_sens 	= GCS_parameters.Throtle_sens;
@@ -435,6 +453,12 @@ int simulink_main(int argc, char *argv[])
 
 						dbx_control_P.PID_theta_dot_Kd  = GCS_parameters.PID_theta_dot_Kd;
 						dbx_control_P.PID_phi_dot_Kd  	= GCS_parameters.PID_phi_dot_Kd;
+						
+						dbx_control_P.PID_yaw_dot_FF  = GCS_parameters.PID_yaw_dot_FF;
+						dbx_control_P.PID_yaw_dot_Kp  = GCS_parameters.PID_yaw_dot_Kp;
+						
+						dbx_control_P.PID_yaw_dot_Ki  = GCS_parameters.PID_yaw_dot_Ki;
+						dbx_control_P.PID_yaw_dot_Kd  = GCS_parameters.PID_yaw_dot_Kd;
 
 						// output FMU LED signals
 						if (dbx_control_Y.led_blue == 1) {

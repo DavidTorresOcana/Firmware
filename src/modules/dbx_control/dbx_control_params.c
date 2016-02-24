@@ -411,3 +411,47 @@ PARAM_DEFINE_FLOAT(DBCL_THTA_D_KD, 0.0f);
  * @group DBX_CL Control
  */
 PARAM_DEFINE_FLOAT(DBCL_PHI_D_KD, 0.0f);
+
+/**
+ * Theta_dot D Gain of PID cotnroller
+ *
+ * RE-CHECK this.
+ *
+ * @min
+ * @max
+ * @group DBX_CL Control
+ */
+PARAM_DEFINE_FLOAT(DBCL_YAW_FF, 0.0f);
+
+/**
+ * Phi_dot D Gain of PID cotnroller
+ *
+ * RE-CHECK this.
+ *
+ * @min
+ * @max
+ * @group DBX_CL Control
+ */
+PARAM_DEFINE_FLOAT(DBCL_YAW_KP, 4.0f);
+
+/**
+ * Phi_dot D Gain of PID cotnroller
+ *
+ * RE-CHECK this.
+ *
+ * @min
+ * @max
+ * @group DBX_CL Control
+ */
+PARAM_DEFINE_FLOAT(DBCL_YAW_KI, 0.2f);
+
+/**
+ * Phi_dot D Gain of PID cotnroller
+ *
+ * RE-CHECK this.
+ *
+ * @min
+ * @max
+ * @group DBX_CL Control
+ */
+PARAM_DEFINE_FLOAT(DBCL_YAW_KD, 0.0f);
