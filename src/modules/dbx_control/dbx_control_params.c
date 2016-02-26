@@ -455,3 +455,14 @@ PARAM_DEFINE_FLOAT(DBCL_YAW_KI, 0.2f);
  * @group DBX_CL Control
  */
 PARAM_DEFINE_FLOAT(DBCL_YAW_KD, 0.0f);
+
+/**
+ * Yaw channel sensitivity to manual commands
+ *
+ * RE-CHECK this.
+ *
+ * @min
+ * @max
+ * @group DBX_CL Control
+ */
+PARAM_DEFINE_FLOAT(DBCL_YAW_SENS, 0.4f);

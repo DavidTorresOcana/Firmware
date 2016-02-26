@@ -139,6 +139,7 @@ struct {
 	float PID_yaw_dot_Kp;
 	float PID_yaw_dot_Ki;
 	float PID_yaw_dot_Kd;
+	float PID_yaw_sens;
 }		GCS_parameters;
 
 int simulink_main(int argc, char *argv[])
@@ -213,6 +214,7 @@ int simulink_main(int argc, char *argv[])
 		param_t PID_yaw_dot_Ki;
 		param_t PID_yaw_dot_Kd;
 		param_t PID_yaw_dot_FF;
+		param_t PID_yaw_sens;
 
 	}	GCS_comms_pointers;
 
@@ -261,6 +263,7 @@ int simulink_main(int argc, char *argv[])
 	GCS_comms_pointers.PID_yaw_dot_Ki = param_find("DBCL_YAW_KI");
 	GCS_comms_pointers.PID_yaw_dot_Kd = param_find("DBCL_YAW_KD");
 	GCS_comms_pointers.PID_yaw_dot_FF = param_find("DBCL_YAW_FF");
+	GCS_comms_pointers.PID_yaw_sens = param_find("DBCL_YAW_SENS");
 	
 
 	// Limiting the update rate
@@ -414,6 +417,7 @@ int simulink_main(int argc, char *argv[])
 						param_get(GCS_comms_pointers.PID_yaw_dot_Kp,  	&(GCS_parameters.PID_yaw_dot_Kp));
 						param_get(GCS_comms_pointers.PID_yaw_dot_Ki,  	&(GCS_parameters.PID_yaw_dot_Ki));
 						param_get(GCS_comms_pointers.PID_yaw_dot_Kd,  	&(GCS_parameters.PID_yaw_dot_Kd));
+						param_get(GCS_comms_pointers.PID_yaw_sens,  	&(GCS_parameters.PID_yaw_sens));
 
 						// Declarar las ganancias de Simulink: se podria necesitar Casting!
 						dbx_control_P.Throtle_sens 	= GCS_parameters.Throtle_sens;
@@ -459,6 +463,7 @@ int simulink_main(int argc, char *argv[])
 						
 						dbx_control_P.PID_yaw_dot_Ki  = GCS_parameters.PID_yaw_dot_Ki;
 						dbx_control_P.PID_yaw_dot_Kd  = GCS_parameters.PID_yaw_dot_Kd;
+						dbx_control_P.DBCL_Yaw_Dot_Sens  = GCS_parameters.PID_yaw_sens;
 
 						// output FMU LED signals
 						if (dbx_control_Y.led_blue == 1) {
