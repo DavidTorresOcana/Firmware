@@ -92,6 +92,18 @@ static int simulink_task;
 static bool thread_exit = true;
 static bool pwm_enabled;
 
+// print flag bools
+static bool print_flag = false;
+static bool print_pwmout = false;
+static bool print_pwmin = false;
+static bool print_sensors = false;
+static bool print_debug = false;
+
+// RC state variables
+rc_lost_flag = true; // RC signal lost flag
+rc_lost_max = 10; // Number of consecutive RC fault signal before setting lost flag
+rc_lost_ctr = 0; //
+
 struct rgbled_rgbset_t{
 	uint8_t red;
 	uint8_t green;
@@ -141,6 +153,80 @@ struct {
 	float PID_yaw_dot_Kd;
 	float PID_yaw_sens;
 }		GCS_parameters;
+
+int dbx_control_main(int argc, char *argv[])
+{	// start primary application thread
+	if (!strcmp(argv[1], "start")) {
+
+		if (!thread_exit) {
+			warnx("already running");
+			/* this is not an error */
+			return 0;
+		}
+
+		thread_exit = false;
+		simulink_task = px4_task_spawn_cmd("dbx_control",
+		SCHED_DEFAULT,
+		SCHED_PRIORITY_MAX - 15,
+		10240,
+		simulink_main,
+		NULL);
+		PX4_INFO("dbx_control started");
+		exit(0);
+	}
+
+	// terminate primary application thread
+	if (!strcmp(argv[1], "stop")) {
+		thread_exit = true;
+		exit(0);
+	}
+	
+	// print command
+	if (!strcmp(argv[1], "print")) {
+		print_usage();
+		
+		// Add print flags
+		if (!strcmp(argv[2], "PWM_OUT")) {
+			print_flag = true;
+			print_pwmout = true;
+		}
+		
+		else if (!strcmp(argv[2], "PWM_IN")) {
+			print_flag = true;
+			print_pwmin = true;
+		}
+		
+		else if (!strcmp(argv[2], "DEBUG")) {
+			print_flag = true;
+			print_debug = true;
+		}
+		
+		else if (!strcmp(argv[2], "SENSORS")) {
+			print_sensors = true;
+			print_pwmin = true;
+		}
+		
+		else if (!strcmp(argv[2], "stop")) {
+			print_pwmout = false;
+			print_pwmin = false;
+			print_sensors = false;
+			print_debug = false;
+			print_flag = false;
+		}
+		
+		else {
+			print_usage();
+		}
+	}
+
+	exit(1);
+}
+
+void print_usage(void) {
+	PX4_INFO("Print usage:");
+	PX4_INFO("PWM_OUT - Prints simulink PWM outputs");
+	PX4_INFO("stop - Stops all printing flags");
+}
 
 int simulink_main(int argc, char *argv[])
 {	dbx_control_initialize();
@@ -367,14 +453,7 @@ int simulink_main(int argc, char *argv[])
 							PX4_INFO("\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\t\t  ARMED\n");
 						} else if (dbx_control_Y.pwm_arm == 0 && pwm_enabled == 1) {
 							// disarm system
-							ioctl(pwm, PWM_SERVO_SET(0), 900);
-							ioctl(pwm, PWM_SERVO_SET(1), 900);
-							ioctl(pwm, PWM_SERVO_SET(2), 900);
-							ioctl(pwm, PWM_SERVO_SET(3), 1500);
-							ioctl(pwm, PWM_SERVO_SET(4), 1500);
-							ioctl(pwm, PWM_SERVO_SET(5), 1500);
-							ioctl(pwm, PWM_SERVO_SET(6), 1600);
-							ioctl(pwm, PWM_SERVO_SET(7), 1500);
+							failsafe_pwm_output(pwm);
 							pwm_enabled = 0;
 							rgb_buzzer_disarmed(true);
 							PX4_INFO("\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\tDISARMED\n");
@@ -484,64 +563,74 @@ int simulink_main(int argc, char *argv[])
 						//rgb_value.blue = dbx_control_Y.rgb_blue;
 						//ioctl(rgbled, RGBLED_SET_RGB, (unsigned long)&rgb_value);
 
-						// //print debug data
-						// printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%i\n",
-						// (double)(dbx_control_U.runtime/1000000),
-						// (double)dbx_control_Y.debug1,
-						// (double)dbx_control_Y.debug2,
-						// (double)dbx_control_Y.debug3,
-						// (double)dbx_control_Y.debug4,
-						// (double)dbx_control_Y.debug5,
-						// (double)dbx_control_Y.debug6,
-						// (double)dbx_control_Y.debug7,
-						// (double)dbx_control_Y.debug8,
-						// pwm_inputs.channel_count);
+						if (print_flag) {
+							// //print debug data
+							if (print_debug) {
+								printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%i\n",
+								(double)(dbx_control_U.runtime/1000000),
+								(double)dbx_control_Y.debug1,
+								(double)dbx_control_Y.debug2,
+								(double)dbx_control_Y.debug3,
+								(double)dbx_control_Y.debug4,
+								(double)dbx_control_Y.debug5,
+								(double)dbx_control_Y.debug6,
+								(double)dbx_control_Y.debug7,
+								(double)dbx_control_Y.debug8,
+								pwm_inputs.channel_count);
+							}
 
-						// Print Simulink outputs
-						/* printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
-						(int)(dbx_control_U.runtime/1000000),
-						(int)dbx_control_Y.pwm1,
-						(int)dbx_control_Y.pwm2,
-						(int)dbx_control_Y.pwm3,
-						(int)dbx_control_Y.pwm4,
-						(int)dbx_control_Y.pwm5,
-						(int)dbx_control_Y.pwm6,
-						(int)dbx_control_Y.pwm7,
-						(int)dbx_control_Y.pwm8,
-						pwm_inputs.channel_count); */
+							// Print Simulink outputs
+							if (print_pwmout) {
+								printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
+								(int)(dbx_control_U.runtime/1000000),
+								(int)dbx_control_Y.pwm1,
+								(int)dbx_control_Y.pwm2,
+								(int)dbx_control_Y.pwm3,
+								(int)dbx_control_Y.pwm4,
+								(int)dbx_control_Y.pwm5,
+								(int)dbx_control_Y.pwm6,
+								(int)dbx_control_Y.pwm7,
+								(int)dbx_control_Y.pwm8,
+								pwm_inputs.channel_count);
+							}
 
-						// Print Radio pwm inputs
-// 						printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
-// 						(int)(dbx_control_U.runtime/1000000),
-// 						pwm_inputs.values[0],
-// 						pwm_inputs.values[1],
-// 						pwm_inputs.values[2],
-// 						pwm_inputs.values[3],
-// 						pwm_inputs.values[4],
-// 						pwm_inputs.values[5],
-// 						pwm_inputs.values[6],
-// 						pwm_inputs.values[7],
-// 						pwm_inputs.channel_count);
+							// Print Radio pwm inputs
+							if(print_pwmin) {
+								printf("%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\t%i\n",
+								(int)(dbx_control_U.runtime/1000000),
+								pwm_inputs.values[0],
+								pwm_inputs.values[1],
+								pwm_inputs.values[2],
+								pwm_inputs.values[3],
+								pwm_inputs.values[4],
+								pwm_inputs.values[5],
+								pwm_inputs.values[6],
+								pwm_inputs.values[7],
+								pwm_inputs.channel_count);
+							}
+							
+							// Sensors debuging and testing
+							if (print_sensors) {
+								printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t\n",
+								(double)(dbx_control_U.runtime/1000000),
+								(double)local_pos.x,
+								(double)local_pos.y,
+								(double)local_pos.z,
+								(double)gps.epv,
+								(double)local_pos.vx,
+								(double)local_pos.vy,
+								(double)local_pos.vz,
+								(double)airspeed.true_airspeed_m_s,
+								(double)sensors.baro_alt_meter[0], // TO BE verified: Is it correct altitude?
+								(double)sensors.accelerometer_m_s2[2],
+								(double)sensors.gyro_rad_s[0],
+								(double)bat_status.voltage_filtered_v,
+								(double)attitude.pitch,
+								(double)attitude.yaw);
+							}
+						}
+					i = 1;
 
-						/*
-						// Sensors debuging and testing
-						printf("%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t%8.4f\t\n",
-						(double)(dbx_control_U.runtime/1000000),
-						(double)local_pos.x,
-						(double)local_pos.y,
-						(double)local_pos.z,
-						(double)gps.epv,
-						(double)local_pos.vx,
-						(double)local_pos.vy,
-						(double)local_pos.vz,
-						(double)airspeed.true_airspeed_m_s,
-						(double)sensors.baro_alt_meter[0], // TO BE verified: Is it correct altitude?
-						(double)sensors.accelerometer_m_s2[2],
-						(double)sensors.gyro_rad_s[0],
-						(double)bat_status.voltage_filtered_v,
-						(double)attitude.pitch,
-						(double)attitude.yaw); */
-						i = 1;
 					}
 
 					// MATLAB INPUT FAILSAFE
@@ -602,36 +691,6 @@ int simulink_main(int argc, char *argv[])
 	close(gps_sub);
 	// terminate application thread
 	exit(0);
-}
-
-int dbx_control_main(int argc, char *argv[])
-{	// start primary application thread
-	if (!strcmp(argv[1], "start")) {
-
-		if (!thread_exit) {
-			warnx("already running");
-			/* this is not an error */
-			return 0;
-		}
-
-		thread_exit = false;
-		simulink_task = px4_task_spawn_cmd("dbx_control",
-		SCHED_DEFAULT,
-		SCHED_PRIORITY_MAX - 15,
-		10240,
-		simulink_main,
-		NULL);
-		PX4_INFO("dbx_control started");
-		exit(0);
-	}
-
-	// terminate primary application thread
-	if (!strcmp(argv[1], "stop")) {
-		thread_exit = true;
-		exit(0);
-	}
-
-	exit(1);
 }
 
 int failsafe_pwm_output(int pwm) {
