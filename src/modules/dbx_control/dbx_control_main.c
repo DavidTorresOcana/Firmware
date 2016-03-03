@@ -201,9 +201,9 @@ int dbx_control_main(int argc, char *argv[])
 			print_debug = true;
 		}
 		
-		else if (!strcmp(argv[2], "SENSORS")) {
+		else if (!strcmp(argv[2], "SENS")) {
+			print_flag = true;
 			print_sensors = true;
-			print_pwmin = true;
 		}
 		
 		else if (!strcmp(argv[2], "stop")) {
