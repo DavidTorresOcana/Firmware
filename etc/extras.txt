@@ -1,15 +1,21 @@
 sh /etc/init.d/rc.mc_defaults
 
 #
-# Mavlink Pixhawk: ttyS1
+# Mavlink Pixhawk: ttyS1 (TELEM1 PORT)
 #
 mavlink start -d /dev/ttyS1 -b 115200
 usleep 2000
 
 #
-# RPI Serial interface
+# RPI Serial interface (TELEM2 PORT)
 #
 #mavlink start -d /dev/ttyS2 -b 115200
+#usleep 2000
+
+#
+# APM WIFI Serial interface (TELEM2 PORT)
+#
+#mavlink start -d /dev/ttyS2 -b 57600
 #usleep 2000
 
 #
