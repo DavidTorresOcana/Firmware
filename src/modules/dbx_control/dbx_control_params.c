@@ -466,3 +466,47 @@ PARAM_DEFINE_FLOAT(DBCL_YAW_KD, 0.0f);
  * @group DBX_CL Control
  */
 PARAM_DEFINE_FLOAT(DBCL_YAW_SENS, 0.4f);
+
+/**
+ * Control allocation relative weight between attitude and vertical acc
+ *
+ * RE-CHECK this.
+ *
+ * @min 0
+ * @max
+ * @group DBX_NDI
+ */
+PARAM_DEFINE_FLOAT(DBNDI_CA_W, 100000.0f);
+
+/**
+ * Control allocation error channel weight
+ *
+ * RE-CHECK this.
+ *
+ * @min 0
+ * @max
+ * @group DBX_NDI
+ */
+PARAM_DEFINE_FLOAT(DBNDI_CA_GAMMA, 0.1f);
+
+/**
+ * Vertical acc int gain
+ *
+ * RE-CHECK this.
+ *
+ * @min 0
+ * @max
+ * @group DBX_NDI
+ */
+PARAM_DEFINE_FLOAT(DBNDI_KP_ACC, 0.1f);
+
+/**
+ * Vertical acc int saturation limit
+ *
+ * RE-CHECK this.
+ *
+ * @min 0
+ * @max
+ * @group DBX_NDI
+ */
+PARAM_DEFINE_FLOAT(DBNDI_LIM_ACC, 5.0f);

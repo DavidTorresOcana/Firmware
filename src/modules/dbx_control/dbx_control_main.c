@@ -152,6 +152,11 @@ struct {
 	float PID_yaw_dot_Ki;
 	float PID_yaw_dot_Kd;
 	float PID_yaw_sens;
+	
+	float CA_att_acc_weight;
+	float CA_gamma;
+	float Acc_sat_limit;
+	float Acc_int_gain;
 }		GCS_parameters;
 
 int dbx_control_main(int argc, char *argv[])
@@ -301,7 +306,11 @@ int simulink_main(int argc, char *argv[])
 		param_t PID_yaw_dot_Kd;
 		param_t PID_yaw_dot_FF;
 		param_t PID_yaw_sens;
-
+		
+		param_t Acc_int_gain;
+		param_t Acc_sat_limit;
+		param_t CA_gamma;
+		param_t CA_att_acc_weight;
 	}	GCS_comms_pointers;
 
 	// Get the pointers to GCS params
@@ -351,6 +360,10 @@ int simulink_main(int argc, char *argv[])
 	GCS_comms_pointers.PID_yaw_dot_FF = param_find("DBCL_YAW_FF");
 	GCS_comms_pointers.PID_yaw_sens = param_find("DBCL_YAW_SENS");
 	
+	GCS_comms_pointers.Acc_int_gain = param_find("DBNDI_KP_ACC");
+	GCS_comms_pointers.Acc_sat_limit = param_find("DBNDI_LIM_ACC");
+	GCS_comms_pointers.CA_gamma = param_find("DBNDI_CA_GAMMA");
+	GCS_comms_pointers.CA_att_acc_weight = param_find("DBNDI_CA_W");
 
 	// Limiting the update rate
 	orb_set_interval(sensors_sub, step_size);
@@ -497,6 +510,11 @@ int simulink_main(int argc, char *argv[])
 						param_get(GCS_comms_pointers.PID_yaw_dot_Ki,  	&(GCS_parameters.PID_yaw_dot_Ki));
 						param_get(GCS_comms_pointers.PID_yaw_dot_Kd,  	&(GCS_parameters.PID_yaw_dot_Kd));
 						param_get(GCS_comms_pointers.PID_yaw_sens,  	&(GCS_parameters.PID_yaw_sens));
+						
+						param_get(GCS_comms_pointers.CA_att_acc_weight, &(GCS_parameters.CA_att_acc_weight));
+						param_get(GCS_comms_pointers.CA_gamma,  		&(GCS_parameters.CA_gamma));
+						param_get(GCS_comms_pointers.Acc_sat_limit,  	&(GCS_parameters.Acc_sat_limit));
+						param_get(GCS_comms_pointers.Acc_int_gain,  	&(GCS_parameters.Acc_int_gain));
 
 						// Declarar las ganancias de Simulink: se podria necesitar Casting!
 						dbx_control_P.Throtle_sens 	= GCS_parameters.Throtle_sens;
@@ -543,6 +561,11 @@ int simulink_main(int argc, char *argv[])
 						dbx_control_P.PID_yaw_dot_Ki  = GCS_parameters.PID_yaw_dot_Ki;
 						dbx_control_P.PID_yaw_dot_Kd  = GCS_parameters.PID_yaw_dot_Kd;
 						dbx_control_P.DBCL_Yaw_Dot_Sens  = GCS_parameters.PID_yaw_sens;
+						
+						dbx_control_P.CA_att_acc_weight  = GCS_parameters.CA_att_acc_weight;
+						dbx_control_P.CA_gamma  = GCS_parameters.CA_gamma;
+						dbx_control_P.Acc_sat_limit  = GCS_parameters.Acc_sat_limit;
+						dbx_control_P.Acc_int_gain  = GCS_parameters.Acc_int_gain;
 
 						// output FMU LED signals
 						if (dbx_control_Y.led_blue == 1) {
