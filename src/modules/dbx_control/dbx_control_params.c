@@ -38,9 +38,11 @@
  * @author David Torres <david.torres@dbxdrones.com>
  * @author Juan Herrero <jn.herrerom@gmail.com>
  */
+
 #include <px4_config.h>
 #include <systemlib/param/param.h>
 
+// PARAMS HAVE TO BE LESS THAN 15 CHARACTERS
 /**
  * Sensibilidad throtle en m/s2
  *
@@ -510,3 +512,14 @@ PARAM_DEFINE_FLOAT(DBNDI_KP_ACC, 0.1f);
  * @group DBX_NDI
  */
 PARAM_DEFINE_FLOAT(DBNDI_LIM_ACC, 5.0f);
+
+/**
+ * Vertical acc int saturation initial condition
+ *
+ * RE-CHECK this.
+ *
+ * @min 0
+ * @max
+ * @group DBX_NDI
+ */
+PARAM_DEFINE_FLOAT(DBNDI_INIT_ACC, 5.0f);

@@ -157,6 +157,7 @@ struct {
 	float CA_gamma;
 	float Acc_sat_limit;
 	float Acc_int_gain;
+	float Acc_int_init;
 }		GCS_parameters;
 
 int dbx_control_main(int argc, char *argv[])
@@ -308,6 +309,7 @@ int simulink_main(int argc, char *argv[])
 		param_t PID_yaw_sens;
 		
 		param_t Acc_int_gain;
+		param_t Acc_int_init;
 		param_t Acc_sat_limit;
 		param_t CA_gamma;
 		param_t CA_att_acc_weight;
@@ -361,6 +363,7 @@ int simulink_main(int argc, char *argv[])
 	GCS_comms_pointers.PID_yaw_sens = param_find("DBCL_YAW_SENS");
 	
 	GCS_comms_pointers.Acc_int_gain = param_find("DBNDI_KP_ACC");
+	GCS_comms_pointers.Acc_int_init = param_find("DBNDI_INIT_ACC");
 	GCS_comms_pointers.Acc_sat_limit = param_find("DBNDI_LIM_ACC");
 	GCS_comms_pointers.CA_gamma = param_find("DBNDI_CA_GAMMA");
 	GCS_comms_pointers.CA_att_acc_weight = param_find("DBNDI_CA_W");
@@ -514,6 +517,7 @@ int simulink_main(int argc, char *argv[])
 						param_get(GCS_comms_pointers.CA_att_acc_weight, &(GCS_parameters.CA_att_acc_weight));
 						param_get(GCS_comms_pointers.CA_gamma,  		&(GCS_parameters.CA_gamma));
 						param_get(GCS_comms_pointers.Acc_sat_limit,  	&(GCS_parameters.Acc_sat_limit));
+						param_get(GCS_comms_pointers.Acc_int_init,  	&(GCS_parameters.Acc_int_init));
 						param_get(GCS_comms_pointers.Acc_int_gain,  	&(GCS_parameters.Acc_int_gain));
 
 						// Declarar las ganancias de Simulink: se podria necesitar Casting!
@@ -566,6 +570,7 @@ int simulink_main(int argc, char *argv[])
 						dbx_control_P.CA_gamma  = GCS_parameters.CA_gamma;
 						dbx_control_P.Acc_sat_limit  = GCS_parameters.Acc_sat_limit;
 						dbx_control_P.Acc_int_gain  = GCS_parameters.Acc_int_gain;
+						dbx_control_P.Acc_int_init  = GCS_parameters.Acc_int_init;
 
 						// output FMU LED signals
 						if (dbx_control_Y.led_blue == 1) {

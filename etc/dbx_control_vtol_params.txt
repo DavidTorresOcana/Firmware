@@ -49,5 +49,14 @@ param set DBCL_PHI_D_KI 0.0
 param set DBCL_THTA_D_KD 0.0
 param set DBCL_PHI_D_KD 0.0
 
+param set DBCL_THTA_D_KD 0.0
+param set DBCL_PHI_D_KD 0.0
+
+param set DBNDI_CA_W, 100000.0
+param set DBNDI_CA_GAMMA 0.1
+param set DBNDI_KP_ACC 0.1
+param set DBNDI_LIM_ACC 5.0
+param set DBNDI_INIT_ACC 3.0
+
 echo "Control_params"
 #exit
