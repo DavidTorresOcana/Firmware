@@ -1,0 +1,34 @@
+
+
+# Tricopter Y-Configuration Mixer for DBX Dronebox
+# Yaw Servo +Output ==> -Yaw Vehicle Rotation
+
+# Inputs are assumed to be 
+# Ch1 Roll
+# Ch2 Pitch
+# Ch3 Throttle
+# Ch4 Yaw
+
+# Outputs 1, 2 and 3
+# Roll and pitch multicopter mixer
+# Motors
+R: 3y 10000 10000 10000 0
+
+# Outputs 4 and 5 are empty
+# Substitute X ([-10000, 10000]) in 
+# 	O:      10000  10000      X -10000  10000
+# to define an offset that will determine the PWM 4 and 5 outputs while in MC mode
+M: 1
+O: 	0      0	  0 -10000  10000
+S: 0 0  0      0          0 -10000  10000
+
+M: 1
+O:      0      0          0 -10000  10000
+S: 0 0  0      0      	  0 -10000  10000
+
+# Output 6
+# Yaw Servo
+M: 1
+O:      10000  10000      0 -10000  10000
+S: 0 2 -10000 -10000      0 -10000  10000
+
